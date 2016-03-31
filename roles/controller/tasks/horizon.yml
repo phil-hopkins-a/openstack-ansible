@@ -2,17 +2,13 @@
 # Tasks for the Horizon controller node
 # Note: need to fix the horizon install method - this way does not work with Mitaka
 
-- name: remove some files placed in the wrong directory
-  file: path=/usr/local/lib/python2.7/dist-packages/openstack_dashboard state=absent
-
 - name: Clone Horizon directory
   git: repo=https://github.com/openstack/horizon.git  version={{openstack_version}}
        dest=/root/horizon
        
-- name: install horizon files
+- name: Install horizon files
   shell: pip install -U .
-  args:
-     chdir: /root/horizon
+    chdir: /root/horizon
 
 - name: Make directory in var/lib
   file: path=/var/lib/openstack-dashboard state=directory owner=horizon group=horizon
@@ -22,10 +18,6 @@
 
 - name: copy the openstack settings file
   template:  src=local_settings.j2 dest=/etc/openstack_dashboard/local_settings.py owner=horizon group=horizon
-
--name: Install Horizon files
-  shell: pip install .
-    chdir: /root/horizon
 
 - name: configure openstack_dashboard/local/local_settings.py
   template: src=local_settings.j2 dest=/root/horizon/openstack_dashboard/local/local_settings.py

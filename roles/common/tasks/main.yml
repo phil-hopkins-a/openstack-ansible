@@ -7,8 +7,8 @@
 - name: install prerequisites
   apt: pkg=python-software-properties state=latest
 
-- name: Update the system again
-  apt: update_cache=yes
+#- name: Update the system again
+#  apt: update_cache=yes
   
 - name: Update the system
   apt: upgrade=dist
