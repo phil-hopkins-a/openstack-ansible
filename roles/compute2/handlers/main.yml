@@ -1,0 +1,19 @@
+---
+# Handler for the compute node
+
+- name: restart libvirtd
+  service: name=libvirtd state=restarted
+
+- name: restart nova-compute
+  service: name=nova-compute state=restarted enabled=yes
+
+- name: restart neutron-openvswitch-agent
+  service: name=neutron-openvswitch-agent state=restarted enabled=yes
+  when: ml2_environment == 'openvswitch'
+
+- name: restart neutron-linuxbridge-agent
+  service: name=neutron-linuxbridge-agent state=restarted enabled=yes
+  when: ml2_environment == 'linuxbridge'
+  
+
+

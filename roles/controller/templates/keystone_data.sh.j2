@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+
+# Copyright 2013 OpenStack LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+{% set controller_mgmt_ip = hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address %}
+export CONTROLLER_PUBLIC_ADDRESS={{ controller_mgmt_ip }}
+export CONTROLLER_ADMIN_ADDRESS={{ controller_mgmt_ip }}
+export CONTROLLER_INTERNAL_ADDRESS={{ controller_mgmt_ip }}
+
+TOOLS_DIR=$(cd $(dirname "$0") && pwd)
+KEYSTONE_CONF=${KEYSTONE_CONF:-/etc/keystone/keystone.conf}
+
+
+export OS_USERNAME=admin
+export OS_PASSWORD={{ admin_pass }}
+export OS_AUTH_URL=http://{{ controller_mgmt_ip }}:5000
+export OS_IDENTITY_API_VERSION=3
+export OS_PROJECT_NAME=admin
+export OS_DOMAIN_NAME=default
+export OS_REGION_NAME=RegionOne
+
+token_id=`openstack token issue --os-username admin --os-project-name admin         --os-user-domain-id default --os-project-domain-id default --os-identity-api-version 3 --os-auth-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-password {{ admin_pass }}|egrep " id"|cut -d '|' -f 3`
+openstack service create identity --name keystone --description "Keystone Identity Service" \
+          --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create keystone admin "http://$CONTROLLER_PUBLIC_ADDRESS:35357/v3" --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create keystone public "http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create keystone internal "http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+
+#
+# Create a tenant
+#
+openstack project create {{ admin_tenant }} \
+          --description "Admin Project"
+
+openstack user create {{ admin_tenant_user }} \
+          --password {{ admin_pass }} \
+          --project {{ admin_tenant }}
+
+openstack role add --user {{ admin_tenant_user }} \
+                   --project {{ admin_tenant }} \
+                   admin 
+
+openstack project create service \
+          --description "Services" 
+
+# Nova service
+#
+openstack user create nova \
+          --password {{ nova_pass }} \
+          --project service
+
+openstack role add --user nova \
+                   --project service \
+                   admin 
+          
+openstack service create --name nova \
+                        --description "Nova Compute Service" compute
+
+openstack endpoint create nova admin "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s" --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create nova public "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create nova internal "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+
+#
+# Volume service
+#
+
+openstack user create cinder \
+          --password {{ cinder_pass }} \
+          --project service
+
+openstack role add --user cinder \
+                   --project service \
+                   admin
+
+openstack service create --name cinder \
+                        --description "Cinder Volume Service" volume
+
+openstack endpoint create cinder admin "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s" --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create cinder public "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create cinder internal "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+
+
+#
+# Image service
+#
+
+openstack user create glance \
+          --password {{ glance_pass }} \
+          --project service
+
+openstack role add --user glance \
+                   --project service \
+                   admin
+                   
+openstack service create --name glance \
+                        --description "Glance Image Service" image
+
+openstack endpoint create glance admin "http://$CONTROLLER_PUBLIC_ADDRESS:9292" --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create glance public "http://$CONTROLLER_PUBLIC_ADDRESS:9292"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create glance internal "http://$CONTROLLER_PUBLIC_ADDRESS:9292"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+
+#
+# Neutron service
+#
+
+openstack user create neutron \
+          --password {{ neutron_pass }} \
+          --project service
+
+openstack role add --user neutron \
+                   --project service \
+                   admin
+
+openstack service create --name neutron \
+                        --description "Neutron Network Service" network
+
+openstack endpoint create neutron admin "http://$CONTROLLER_PUBLIC_ADDRESS:9696" --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create neutron public "http://$CONTROLLER_PUBLIC_ADDRESS:9696"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create neutron internal "http://$CONTROLLER_PUBLIC_ADDRESS:9696"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+
+#
+# Swift service
+#
+
+openstack user create swift \
+          --password {{ nova_pass }} \
+          --project service
+
+openstack role add --user swift \
+                   --project service \
+                   admin
+
+openstack service create --name swift \
+                        --description "Swift Service" "object-store"
+
+openstack endpoint create swift admin "http://$CONTROLLER_ADMIN_ADDRESS:8888/v1" --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create swift public "http://$CONTROLLER_PUBLIC_ADDRESS:8888/v1/AUTH_\$(tenant_id)s"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+openstack endpoint create swift internal "http://$CONTROLLER_INTERNAL_ADDRESS:8888/v1/AUTH_\$(tenant_id)s"  --region RegionOne \
+        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+
+
+

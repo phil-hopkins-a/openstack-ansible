@@ -1,0 +1,18 @@
+#Server Vars
+
+controller_host_name: controller
+controller_access_ip: 10.0.0.3
+controller_mgmt_ip: 10.0.1.3
+controller_data_ip: 10.0.2.3
+net_external_ip: 172.16.0.3
+
+compute_host_name: compute
+compute_access_ip: 10.0.0.4
+compute_mgmt_ip: 10.0.1.4
+compute_data_ip: 10.0.2.4
+
+compute2_host_nam: compute2
+compute2_access_ip: 10.0.0.5
+compute2_mgmt_ip: 10.0.1.5
+compute2_data_ip: 10.0.2.5
+

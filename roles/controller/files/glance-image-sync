@@ -1,0 +1,4 @@
+[DEFAULT]
+api_nodes = $MY_IP
+rsync_user = glance
+lock_file = /var/run/glance-image-sync

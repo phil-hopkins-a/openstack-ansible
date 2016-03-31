@@ -1,0 +1,64 @@
+---
+# Handlers for the controller plays
+
+- name: restart mysql
+  service: name=mysql state=restarted
+
+- name: restart keystone
+  service: name=apache2 state=restarted
+
+- name: restart glance
+  service: name={{ item }} state=restarted
+  with_items:
+   - glance-api
+   - glance-registry
+
+- name: restart nova
+  service: name={{ item }} state=restarted 
+  with_items:
+   - nova-api
+   - nova-scheduler
+   - nova-cert
+   - nova-consoleauth
+   - nova-conductor
+
+- name: restart neutron
+  service: name={{ item }} state=restarted 
+  with_items:
+   - neutron-server
+   - neutron-dhcp-agent
+   - neutron-l3-agent
+   - neutron-metadata-agent
+   
+- name: restart neutron-ovs
+  service: name={{ item }} state=restarted
+  when: ml2_environment == 'openvswitch'
+  with_items:
+   - neutron-openvswitch-agent
+
+- name: restart neutron-lb
+  service: name={{ item }} state=restarted 
+  when: ml2_environment == 'linuxbridge'
+  with_items:
+   - neutron-linuxbridge-agent
+
+- name: restart cinder
+  service: name={{ item }} state=restarted enabled=yes
+  with_items:
+   - cinder-api
+   - cinder-scheduler
+   - cinder-volume
+
+- name: restart tgt
+  service: name=tgt state=restarted
+
+- name: reload kernel parameters
+  shell: sysctl -p
+
+- name: restart horizon
+  service: name={{ item }} state=restarted
+  with_items:
+   - nova-console
+   - nova-novnc
+   - apache2
+   - memcached

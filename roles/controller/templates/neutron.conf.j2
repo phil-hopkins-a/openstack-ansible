@@ -1,0 +1,50 @@
+
+{% set controller_mgmt_ip = hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address %}
+[DEFAULT]
+#verbose = True
+debug = True
+core_plugin = ml2
+service_plugins = router
+auth_strategy = keystone
+rpc_backend = rabbit
+allow_overlapping_ips = True
+dhcp_agents_per_network = 1
+notify_nova_on_port_status_changes = True
+notify_nova_on_port_data_changes = True
+
+[DATABASE]
+connection = mysql://neutron:{{ neutron_db_pass }}@{{ controller_mgmt_ip }}/neutron
+
+[AGENT]
+root_helper=sudo /usr/local/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+
+[KEYSTONE_AUTHTOKEN]
+auth_uri = http://{{ controller_mgmt_ip }}:5000
+auth_url = http://{{ controller_mgmt_ip }}:35357
+auth_version = 3.0
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = neutron
+password = {{ neutron_pass }}
+
+[NOVA]
+auth_url = http://{{ controller_mgmt_ip }}:35357
+auth_version = 3.0
+auth_plugin = password
+region_name = RegionOne
+project_domain_id = default
+project_name = service
+user_domain_id = default
+username = nova
+password = {{ nova_pass }}
+
+
+[OSLO_CONCURRENCY]
+lock_path = /var/lock/neutron
+
+[OSLO_MESSAGING_RABBIT]
+rabbit_host = {{ controller_mgmt_ip }}
+rabbit_userid = {{ rabbit_user }}
+rabbit_password = {{ rabbit_pass }}

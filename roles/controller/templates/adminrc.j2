@@ -1,0 +1,10 @@
+{% set controller_mgmt_ip = hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address %}
+#This will be a v2 user
+export OS_USERNAME=demoadmin
+export OS_PASSWORD={{ admin_pass }}
+export OS_PROJECT_NAME=demo
+export OS_TENANT_NAME=demo
+unset OS_DOMAIN_NAME
+export OS_AUTH_URL=http://{{ controller_mgmt_ip }}:5000/v2.0
+export OS_IDENTITY_API_VERSION=2
+export OS_REGION_NAME=RegionOne

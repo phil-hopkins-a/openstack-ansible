@@ -1,0 +1,78 @@
+{% set controller_mgmt_ip = hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address %}
+{% set local_ip = hostvars[ansible_hostname]['ansible_'+ifaceM].ipv4.address %}
+
+[DEFAULT]
+
+#verbose = True
+debug = True
+dhcpbridge_flagfile = /etc/nova/nova.conf
+dhcpbridge = /usr/local/bin/nova-dhcpbridge
+logdir = /var/log/nova
+state_path = /var/lib/nova
+lock_path = /var/lock/nova
+force_dhcp_release = True
+iscsi_helper = tgtadm
+libvirt_use_virtio_for_bridges = True
+connection_type = libvirt
+root_helper = sudo /usr/local/bin/nova-rootwrap /etc/nova/rootwrap.conf
+api_paste_config = /etc/nova/api-paste.ini
+volumes_path = /var/lib/nova/volumes
+enabled_apis = osapi_compute,metadata
+network_api_class=nova.network.neutronv2.api.API
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+security_group_api = neutron
+linuxnet_interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+auth_strategy = keystone
+force_config_drive = True
+my_ip={{ local_ip }}
+
+fixed_ip_disassociate_timeout = 30
+enable_instance_password = False
+service_neutron_metadata_proxy = True
+neutron_metadata_proxy_shared_secret = openstack
+
+# NOVNC CONSOLE
+novncproxy_base_url=http://{{ NOVNC_BASE_URL }}/vnc_auto.html
+# Change vncserver_proxyclient_address and vncserver_listen to match each compute host
+vncserver_proxyclient_address={{ local_ip }}
+vncserver_listen={{ local_ip }}
+libvirt_cpu_mode=none
+
+# AUTHENTICATION
+auth_strategy = keystone
+
+[GLANCE]
+host = {{ controller_mgmt_ip }}
+
+[KEYSTONE_AUTHTOKEN]
+auth_uri = http://{{ controller_mgmt_ip }}:5000
+auth_url = http://{{ controller_mgmt_ip }}:35357
+auth_version = 3.0
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = nova
+password = {{ nova_pass }}
+
+[NEUTRON]
+url = http://{{ controller_mgmt_ip }}:9696
+auth_url = http://{{ controller_mgmt_ip }}:35357
+auth_version = 3.0
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+region_name = RegionOne
+project_name = service
+username = neutron
+password = {{ neutron_pass }}
+
+[OSLO_CONCURRENCY]
+lock_path = /var/lock/nova
+
+[OSLO_MESSAGING_RABBIT]
+rabbit_host = {{ controller_mgmt_ip }}
+rabbit_userid = {{ rabbit_user }}
+rabbit_password = {{ rabbit_pass }}
+
+

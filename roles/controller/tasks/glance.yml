@@ -1,0 +1,79 @@
+---
+# Tasks for the glance controller node
+
+- name: Create the glance user
+  user: home="/var/lib/glance" createhome=yes system=yes shell=/bin/false name=glance
+
+- name: make glance log dir
+  file: owner=glance group=glance state=directory path=/var/log/glance
+  
+#- name: make glance lib dir
+#  file: owner=glance group=glance state=directory path=/var/lib/glance
+
+- name: make glance dir
+  file: owner=glance group=glance state=directory path=/etc/glance
+
+- name: make glance image dir
+  file: owner=glance group=glance state=directory path=/var/lib/glance/images
+
+- name: make glance scrubber dir
+  file: owner=glance group=glance state=directory path=/var/lib/glance/scrubber
+
+- name: make glance image-cache dir
+  file: owner=glance group=glance state=directory path=/var/lib/glance/image-cache
+
+- name: use git to clone the glance git repo
+  git: repo=https://github.com/openstack/glance.git version={{openstack_version}}
+     dest=/root/glance
+  
+- name: install the glance etc dir files
+  shell: cp -R glance/etc/* /etc/glance/
+  args:
+     chdir: /root
+     
+- name: install the glance files
+  shell: pip install -U .
+  args:
+     chdir: /root/glance
+
+- name: Setup DB for glance
+  shell: creates=/var/lib/mysql/glance mysql -u root -p{{ mysql_root_pass }} -e "CREATE DATABASE glance;"
+         
+- name: Give right to glance user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=glance password={{glance_db_pass }} priv=*.*:ALL host='%' state=present
+
+- name: Give right to glance user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=glance password={{glance_db_pass }} priv=*.*:ALL host='localhost' state=present
+
+- name: Copy configuration files for glance
+  template: src=glance-api.conf.j2 dest=/etc/glance/glance-api.conf
+  notify: restart glance
+
+- name: Copy configuration files for glance
+  template: src=glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf
+  notify: restart glance
+
+- name: DB sync for Glance
+  shell: /usr/local/bin/glance-manage db_sync; touch /etc/glance/db.synced
+         creates=/etc/glance/db.synced
+  become: yes
+  become_user: glance
+
+- name: reset log file permissions (glance manage command sets them to root)
+  file: path=/var/log/glance owner=glance group=glance state=directory recurse=yes
+
+- name: Copy the upstart file
+  copy: src=glance-api.conf dest=/etc/init/glance-api.conf
+  
+- name: Copy the upstart file
+  copy: src=glance-registry.conf dest=/etc/init/glance-registry.conf
+  
+- name: Copy the glance log rotate file
+  copy: src=glance-logrotate dest=/etc/logrotate.d/glance
+
+- name: start the glance services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+   - glance-api
+   - glance-registry
+

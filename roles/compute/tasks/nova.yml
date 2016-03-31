@@ -1,0 +1,70 @@
+
+- name: Create the nova user
+  user: home="/var/lib/nova" createhome=yes system=yes shell=/bin/false name=nova  groups=libvirtd
+
+- name: use git to clone the nova git repo
+  git: repo=https://github.com/openstack/nova.git version={{openstack_version}}
+       dest=/root/nova
+
+- name: make nova dir
+  file: owner=nova group=nova state=directory path=/etc/nova
+
+- name: make nova log dir
+  file: owner=nova group=nova state=directory path=/var/log/nova
+
+- name: make nova keys dir
+  file: owner=nova group=nova state=directory path=/var/lib/nova/keys
+
+- name: make nova locks dir
+  file: owner=nova group=nova state=directory path=/var/lib/nova/locks
+
+- name: make nova instances dir
+  file: owner=nova group=nova state=directory path=/var/lib/nova/instances
+
+- name: install the nova etc dir files
+  shell: cp -r nova/etc/nova/* /etc/nova/
+  args:
+     chdir: /root 
+
+- name: install the nova etc dir files
+  shell: cp -R nova/etc/nova/rootwrap.d/* /etc/nova/rootwrap.d
+  args:
+     chdir: /root
+
+- name: Copy nova sudoers file
+  copy: src=nova_sudoers dest=/etc/sudoers.d/nova_sudoers mode=440
+
+- name: install the nova files
+  shell: pip install -U .
+  args:
+     chdir: /root/nova
+
+- name: copy configuration file for nova
+  template: src=liberty-nova.conf.j2 dest=/etc/nova/nova.conf
+  when: openstack_version == "stable/liberty"
+
+- name: copy configuration file for nova
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf
+  when: openstack_version != "stable/liberty"
+
+- name: copy configuration file for nova-compute
+  copy: src=nova-compute.conf dest=/etc/nova/nova-compute.conf
+  notify: restart nova-compute
+
+- name: Copy the nova-compute upstart files
+  copy: src=nova-compute-agent dest=/etc/init/nova-compute.conf
+  notify: restart nova-compute
+
+- name: Start the nova compute service
+  service: name=nova-compute state=started enabled=yes
+
+- name: remove libvirt default network
+  file: path=/etc/libvirt/qemu/networks/autostart/default.xml state=absent
+
+- name: destroy the default network
+  shell: virsh net-destroy default
+
+- name: destroy the default network
+  virt_net: command=destroy name=default state=absent autostart=no
+
+

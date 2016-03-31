@@ -1,0 +1,99 @@
+---
+# Tasks for the Horizon controller node
+# Note: need to fix the horizon install method - this way does not work with Mitaka
+
+- name: remove some files placed in the wrong directory
+  file: path=/usr/local/lib/python2.7/dist-packages/openstack_dashboard state=absent
+
+- name: Clone Horizon directory
+  git: repo=https://github.com/openstack/horizon.git  version={{openstack_version}}
+       dest=/root/horizon
+       
+- name: install horizon files
+  shell: pip install -U .
+  args:
+     chdir: /root/horizon
+
+- name: Make directory in var/lib
+  file: path=/var/lib/openstack-dashboard state=directory owner=horizon group=horizon
+
+- name: make the /etc/openstack directory if not already there
+  file: path=/etc/openstack_dashboard state=directory owner=horizon group=horizon
+
+- name: copy the openstack settings file
+  template:  src=local_settings.j2 dest=/etc/openstack_dashboard/local_settings.py owner=horizon group=horizon
+
+-name: Install Horizon files
+  shell: pip install .
+    chdir: /root/horizon
+
+- name: configure openstack_dashboard/local/local_settings.py
+  template: src=local_settings.j2 dest=/root/horizon/openstack_dashboard/local/local_settings.py
+
+- name: Build the wsgi file
+  shell: manage.py make_web_conf --wsgi
+    chdir: /root/horizon
+
+- name: Build the apache conf file
+  shell: manage.py make_web_conf --apache > /etc/apache2/sites-available/horizon.conf
+    chdir: /root/horizon
+
+#- name: remove some files placed in the wrong directory
+#  file: path=/usr/local/lib/python2.7/dist-packages/openstack_dashboard state=absent
+
+#- name: make the openstack_dashboard directory
+#  file: path=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard state=directory
+
+#- name: copy the files to the correct location
+#  shell: cp -r /root/horizon/openstack_dashboard/* /usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard
+
+#- name: change ownership of one directory and its subdirectories
+#  shell: chown -R horizon:horizon /usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/static/
+
+#- name: link static directories
+#  file: src=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/static dest=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/static state=link
+  
+#- name: link the settings directory
+#  file: src=/etc/openstack_dashboard/local_settings.py dest=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/local/local_settings.py state=link
+
+- name: Fix the v3 keystone policy file
+  shell: sed -i 's/"cloud_admin": "role:admin and (token.is_admin_project:True or domain_id:admin_domain_id)",/"cloud_admin": "rule:admin_required and domain_id:admin_domain_id",/g' /etc/keystone/policy.v3cloudsample.json
+
+- name: copy the v3 policy file to where horizon expects it
+  copy: src=/etc/keystone/policy.v3cloudsample.json dest=/root/horizon/openstack_dashboard/conf/
+#  copy: src=/etc/keystone/policy.v3cloudsample.json dest=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/conf/
+
+#- name: Copy the horizon apache conf file
+#  copy: src=horizon-openstack.conf dest=/etc/apache2/sites-available/openstack.conf
+
+- name: disable default site
+  shell: a2dissite 000-default.conf
+
+- name: enable openstack site
+  shell: a2ensite openstack
+
+- name: restart apache
+  service:  name=apache2 state=restarted enabled=yes
+  
+- name: Clone the novnc repo
+  git: repo=https://github.com/kanaka/noVNC dest=/root/noVNC
+
+- name: create a destination directory for the novnc files
+  file: path=/usr/share/novnc state=directory
+
+- name: copy the novnc files
+  copy: src=/root/noVNC/ dest=/usr/share/novnc
+
+- name: install some packages novnc needs
+  apt: pkg={{ item }} state=latest
+  with_items:
+       - libjs-jquery
+       - libjs-sphinxdoc 
+       - libjs-swfobject 
+       - libjs-underscore
+
+- name: copy the novnc upstart file
+  copy: src=nova-novncproxy.conf dest=/etc/init/nova-novncproxy.conf
+
+- name: Start the novnc process
+  service: name=nova-novncproxy state=started enabled=yes

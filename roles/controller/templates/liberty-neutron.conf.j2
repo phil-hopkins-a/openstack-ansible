@@ -1,0 +1,44 @@
+
+{% set controller_mgmt_ip = hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address %}
+[DEFAULT]
+verbose = True
+debug = True
+core_plugin = ml2
+service_plugins = router
+auth_strategy = keystone
+rpc_backend = rabbit
+allow_overlapping_ips = True
+dhcp_agents_per_network = 1
+notify_nova_on_port_status_changes = True
+notify_nova_on_port_data_changes = True
+nova_admin_auth_url = http://{{ controller_mgmt_ip }}:35357/v2.0
+nova_admin_password = nova
+nova_admin_tenant_name = service
+nova_admin_username = nova
+nova_url = http://{{ controller_mgmt_ip }}:8774/v2
+
+
+[DATABASE]
+connection = mysql://neutron:{{ neutron_db_pass }}@{{ controller_mgmt_ip }}/neutron
+
+[AGENT]
+root_helper=sudo /usr/local/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+
+[KEYSTONE_AUTHTOKEN]
+auth_uri = http://{{ controller_mgmt_ip }}:35357/v2.0/
+identity_uri = http://{{ controller_mgmt_ip }}:5000
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+
+[OSLO_CONCURRENCY]
+lock_path = /var/lock/neutron
+
+[OSLO_MESSAGING_RABBIT]
+rabbit_host = {{ controller_mgmt_ip }}
+rabbit_userid = {{ rabbit_user }}
+rabbit_password = {{ rabbit_pass }}
+
+[service_providers]
+# <service_type>:<name>:<driver>[:default] (multi valued)
+#service_provider=LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default

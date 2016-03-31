@@ -1,0 +1,97 @@
+---
+# Tasks for the nova controller node
+
+- name: Create the nova user
+  user: home="/var/lib/nova" createhome=yes system=yes shell=/bin/false name=nova
+
+- name: use git to clone the nova git repo
+  git: repo=https://github.com/openstack/nova.git version={{openstack_version}}
+       dest=/root/nova
+
+- name: make nova dir
+  file: owner=nova group=nova state=directory path=/etc/nova
+
+- name: make nova log dir
+  file: owner=nova group=nova state=directory path=/var/log/nova
+
+- name: install the nova etc dir files
+  shell: cp -r nova/etc/nova/* /etc/nova/
+  args:
+     chdir: /root 
+
+- name: install the nova etc dir files
+  shell: cp -R nova/etc/nova/rootwrap.d/* /etc/nova/rootwrap.d
+  args:
+     chdir: /root  
+
+- name: install the nova files
+  shell: pip install -U .
+  args:
+     chdir: /root/nova
+
+- name: Setup DB for nova
+  shell: creates=/var/lib/mysql/nova mysql -u root -p{{ mysql_root_pass }} -e "CREATE DATABASE nova;"
+
+- name: Give rights to nova user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=nova password={{ nova_db_pass }} priv=*.*:ALL host='localhost' state=present
+
+- name: Give rights to nova user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=nova password={{ nova_db_pass }} priv=*.*:ALL host='%' state=present
+  
+- name: Setup DB for nova-api
+  shell: creates=/var/lib/mysql/nova_api mysql -u root -p{{ mysql_root_pass }} -e "CREATE DATABASE nova_api;"
+
+- name: Give rights to nova user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=nova_api password={{ nova_db_pass }} priv=*.*:ALL host='localhost' state=present
+
+- name: Give rights to nova user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=nova_api password={{ nova_db_pass }} priv=*.*:ALL host='%' state=present
+
+- name: copy configuration file for nova
+  template: src=liberty-nova.conf.j2 dest=/etc/nova/nova.conf
+  when: openstack_version == "stable/liberty"
+
+- name: copy configuration file for nova
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf
+  when: openstack_version != "stable/liberty"
+
+- name: Copy nova sudoers file
+  copy: src=nova_sudoers dest=/etc/sudoers.d/nova_sudoers mode=440
+  
+- name: DB sync for the nova services
+  shell: nova-manage db sync; touch /etc/nova/db.synced creates=/etc/nova/db.synced
+
+- name: DB sync for the nova api services
+  shell: nova-manage api_db sync; touch /etc/nova/api-db.synced creates=/etc/nova/api-db.synced
+
+- name: Copy the nova-api upstart files
+  copy: src=nova-api.conf dest=/etc/init/nova-api.conf
+
+- name: Copy the nova-cert upstart files
+  copy: src=nova-cert.conf dest=/etc/init/nova-cert.conf
+
+- name: Copy the nova-consoleauth upstart files
+  copy: src=nova-consoleauth.conf dest=/etc/init/nova-consoleauth.conf
+
+- name: Copy the nova-conducto upstart files
+  copy: src=nova-conductor.conf dest=/etc/init/nova-conductor.conf
+
+- name: Copy the nova-scheduler upstart files
+  copy: src=nova-scheduler.conf dest=/etc/init/nova-scheduler.conf
+
+- name: remove libvirt default network
+  file: path=/etc/libvirt/qemu/networks/autostart/default.xml state=absent
+
+- name: destroy the default network
+  shell: virsh net-destroy default; touch /etc/nova/virbr0.stop creates=/etc/nova/virbr0.stop
+
+- name: Start the services for nova
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+   - nova-api
+   - nova-scheduler
+   - nova-cert
+   - nova-consoleauth
+   - nova-conductor
+
+

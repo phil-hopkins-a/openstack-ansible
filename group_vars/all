@@ -1,0 +1,79 @@
+---
+# Variables for openstack
+
+#Is this a linux bridge or openvswitch environment
+
+#ml2_environment: openvswitch
+#interface_driv: neutron.agent.linux.interface.OVSInterfaceDriver
+ml2_environment: linuxbridge
+interface_driv: neutron.agent.linux.interface.BridgeInterfaceDriver
+
+#set the version
+#openstack_version: "stable/liberty"
+
+#For installing from trunk
+openstack_version: "HEAD"
+
+rabbit_user: guest
+rabbit_pass: secret
+
+mysql_root_pass: mysql
+
+keystone_db_pass: keystone
+keystone_admin_pass: keystone
+
+glance_db_pass: glance
+glance_pass: glance
+glance_filesystem_store_datadir: /var/lib/glance/images/
+
+nova_db_pass: nova
+nova_pass: nova
+nova_libvirt_type: kvm
+
+neutron_db_pass: neutron
+neutron_pass: neutron
+neutron_external_interface: eth2
+
+swift_pass: swift
+
+# Interface for management, API 
+ifaceM: eth1
+
+# Interface VXLAN tunnels for instance traffic
+ifaceD: eth0
+
+# Interface for access
+ifaceA: eth2
+
+# external interface
+ifaceE: eth3
+
+cinder_db_pass: cinder
+cinder_pass: cinder
+cinder_volume_dev: /dev/vdb
+
+# The value localhost:16080 is for my lab environment
+# otherwise set this to hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address 
+# about is not tested
+NOVNC_BASE_URL: "localhost:16080"
+
+external_network_name: pubilc
+external_subnet_name: public-subnet
+external_subnet_cidr: 172.16.0.0/24
+external_router_name: external-router
+
+#
+#By default a tenant admin is created and below is the password for the admin user of the admin tenant.
+#
+
+admin_tenant: demo
+admin_tenant_user: demoadmin
+admin_pass: secrete 
+
+#Server Vars
+
+controller_host_name: controller
+compute_host_name: compute
+compute2_host_nam: compute2
+
+

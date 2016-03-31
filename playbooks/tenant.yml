@@ -1,0 +1,50 @@
+---
+# Creates tenant user and role
+
+- hosts: openstack_controller
+  tasks:
+   - name: Create Tenant
+     keystone_user: token={{ keystone_admin_token }} tenant={{ tenant_name }} tenant_description="New Tenant"
+     register: tenant
+
+   - name: Create the user for tenant
+     keystone_user: token={{ keystone_admin_token }}  user={{ tenant_username }} tenant={{ tenant_name }} 
+                                  password={{ tenant_password }}
+  
+   - name: Assign role to the created user     
+     keystone_user: token={{ keystone_admin_token }} role=admin user={{ tenant_username }} tenant={{ tenant_name }}
+   
+   - name: Create a network for the tenant
+     neutron_network: state=present login_username={{ admin_tenant_user }} login_password={{ admin_pass }}                     
+                      provider_network_type=gre login_tenant_name={{ admin_tenant }}   
+                      provider_segmentation_id={{ tunnel_id }} tenant_name={{ tenant_name }} name={{ network_name }}
+
+   - name: Create a subnet for the network
+     neutron_subnet: state=present login_username={{ admin_tenant_user }} login_password={{ admin_pass }}
+                     login_tenant_name={{ admin_tenant }} tenant_name={{ tenant_name }}                           
+                     network_name={{ network_name }} name={{ subnet_name }} cidr={{ subnet_cidr }}
+
+
+   - name: Add the network interface to the router
+     neutron_router_interface: state=present login_username={{ admin_tenant_user }} login_password={{ admin_pass }}                               login_tenant_name={{ admin_tenant }} tenant_name={{ tenant_name }} router_name={{ external_router_name }}
+                               subnet_name={{ subnet_name }}
+
+
+   - name: Find the id for the tenant's default security group
+     shell: neutron security-group-list --format=csv --quote=none --column=id
+            --os-tenant-name {{ admin_tenant }} --os-username {{ admin_tenant_user }}
+            --os-password {{ admin_pass }} --os-auth-url http://127.0.0.1:5000/v2.0/
+            -- --tenant-id={{ tenant.id }} --name=default 2>/dev/null | tail -1
+     register: default_sg
+
+   - name: Add a rule in the default security group to allow ssh in
+     command: neutron security-group-rule-create {{ default_sg.stdout }} --tenant-id {{ tenant.id }}
+              --protocol tcp --port-range-min 22 --port-range-max 22 --remote-ip-prefix 0.0.0.0/0
+              --os-tenant-name {{ admin_tenant }} --os-username {{ admin_tenant_user }}
+              --os-password {{ admin_pass }} --os-auth-url http://127.0.0.1:5000/v2.0/
+
+   - name: Add a rule in the default security group to allow icmp in
+     command: neutron security-group-rule-create {{ default_sg.stdout }} --tenant-id {{ tenant.id }}
+              --protocol icmp --port-range-min 1 --port-range-max 255 --remote-ip-prefix 0.0.0.0/0
+              --os-tenant-name {{ admin_tenant }} --os-username {{ admin_tenant_user }}
+              --os-password {{ admin_pass }} --os-auth-url http://127.0.0.1:5000/v2.0/

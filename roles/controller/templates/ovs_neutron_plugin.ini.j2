@@ -1,0 +1,25 @@
+
+[ML2]
+type_drivers = vxlan
+tenant_network_types = vxlan
+mechanism_drivers = openvswitch,l2population
+extension_drivers = port_security
+path_mtu = 1400
+segment_mtu = 1400
+
+[ML2_TYPE_VXLAN]
+vni_ranges = 1:1000
+
+[OVS]
+enable_tunneling = True
+local_ip = {{ hostvars[ansible_hostname]['ansible_'+ifaceD].ipv4.address }}
+
+[AGENT]
+tunnel_types = vxlan
+l2_population = True
+
+[SECURITYGROUP]
+enable_security_group = True
+enable_ipset = True
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+

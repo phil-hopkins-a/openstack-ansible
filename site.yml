@@ -1,0 +1,19 @@
+---
+# The main openstack site deployment playbook
+
+- hosts: all
+  roles:
+   - common
+   
+- hosts: openstack-ubu-controller
+  roles:
+   - controller
+
+- hosts: openstack-ubu-compute
+  roles:
+   - compute
+ 
+- hosts: openstack-ubu-compute2
+  roles:
+   - compute2
+ 

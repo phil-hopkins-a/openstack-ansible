@@ -1,0 +1,10 @@
+[DEFAULT]
+interface_driver = {{ interface_driv }}
+dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+use_namespaces = True
+enable_isolated_metadata = True
+enable_metadata_network = True
+dhcp_delete_namespaces = True
+network_device_mtu = 1400
+
+

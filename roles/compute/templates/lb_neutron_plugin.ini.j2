@@ -1,0 +1,32 @@
+
+[ML2]
+type_drivers = vxlan
+tenant_network_types = vxlan
+mechanism_drivers = linuxbridge,l2population
+extension_drivers = port_security
+path_mtu = 1450
+segment_mtu = 1450
+
+[ML2_TYPE_VXLAN]
+vni_ranges = 1:1000
+vxlan_group = 224.0.0.14
+
+[LINUX_BRIDGE]
+#physical_interface_mappings = 
+
+[AGENT]
+tunnel_types = vxlan
+l2_population = True
+
+[VXLAN]
+enable_vxlan = True
+l2_population = True
+local_ip = {{ hostvars[ansible_hostname]['ansible_'+ifaceD].ipv4.address }}
+vxlan_group = 224.0.0.14
+
+[SECURITYGROUP]
+enable_security_group = True
+enable_ipset = True
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+
+

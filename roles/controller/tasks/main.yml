@@ -1,0 +1,11 @@
+---
+# The mail include file  for the controller node
+
+- include: base.yml
+- include: keystone.yml
+- include: glance.yml
+- include: nova.yml
+#- include: cinder.yml  ### Do not use this section it is incompatible wtih the other sections
+- include: horizon.yml
+- include: neutron.yml
+

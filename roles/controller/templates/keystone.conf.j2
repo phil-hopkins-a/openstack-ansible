@@ -1,0 +1,13 @@
+{% set controller_mgmt_ip = hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address %}
+
+[DEFAULT]
+
+rabbit_host={{ controller_mgmt_ip }}
+#rabbit_port=5672
+rabbit_userid=guest
+rabbit_password=secret
+#debug=false
+verbose=true
+[database]
+connection = mysql://keystone:{{ keystone_db_pass }}@{{ controller_mgmt_ip }}/keystone
+

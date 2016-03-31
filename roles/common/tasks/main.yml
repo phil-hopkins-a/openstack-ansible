@@ -1,0 +1,60 @@
+---
+# The common tasks
+
+- name: Update the system
+  apt: update_cache=yes
+  
+- name: install prerequisites
+  apt: pkg=python-software-properties state=latest
+
+- name: Update the system again
+  apt: update_cache=yes
+  
+- name: Update the system
+  apt: upgrade=dist
+   
+#- name: copy eth0 config file
+#  copy: src=interfaces dest=/etc/network/interfaces.d/eth0.cfg
+  
+#- name: copy eth1 config file
+#  copy: src=interfaces dest=/etc/network/interfaces.d/eth1.cfg
+  
+#- name: copy eth2 config file
+#  copy: src=interfaces dest=/etc/network/interfaces.d/eth2.cfg
+
+- name: Install required packages
+  apt: name={{ item }} state=installed
+  with_items:
+   - ntpdate
+   - ntp
+#   - iscsitarget
+   - python-pyudev
+   - git
+   - python-pip
+   - wget
+#   - python-mysqldb
+  notify: restart services 
+
+- name: Create the hosts entry.
+  template: src=hosts.j2 dest=/etc/hosts
+  
+- name: set hostname file
+  shell: echo {{ inventory_hostname }} > /etc/hostname
+  
+- name: Set Hostname
+  shell: hostname {{ inventory_hostname }}
+  
+- name: update pip
+  shell: pip install -U pip
+
+- name: remove old pip
+  file: path=/usr/bin/pip state=absent
+
+- name: fixup pip location
+  file: src=/usr/local/bin/pip dest=/usr/bin/pip state=link
+
+
+#- name: Regather facts
+#  setup: 
+
+

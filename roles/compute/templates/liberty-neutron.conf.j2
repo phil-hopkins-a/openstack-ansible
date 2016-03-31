@@ -1,0 +1,21 @@
+{% set controller_mgmt_ip = hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address %}
+[DEFAULT]
+#verbose = True
+debug = True
+allow_overlapping_ips = True
+core_plugin = ml2
+service_plugins = router
+#auth_strategy = keystone
+
+[AGENT]
+root_helper=sudo /usr/local/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+
+[OSLO_MESSAGING_RABBIT]
+rabbit_host = {{ controller_mgmt_ip }}
+rabbit_userid = {{ rabbit_user }}
+rabbit_password = {{ rabbit_pass }}
+
+[OSLO_CONCURRENCY]
+lock_path = /var/lock/neutron
+
+

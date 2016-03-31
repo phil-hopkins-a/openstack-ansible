@@ -1,0 +1,156 @@
+---
+# Tasks for the neutron controller node
+
+- name: Create the neutron user
+  user: home="/var/lib/neutron" createhome=yes system=yes shell=/bin/false name=neutron
+  
+- name: use git to clone the neutron git repo
+  git: repo=https://github.com/openstack/neutron.git version={{openstack_version}}
+       dest=/root/neutron
+
+- name: use git to clone the neutron-lbaas git repo
+  git: repo=https://github.com/openstack/neutron-lbaas.git version={{openstack_version}}
+       dest=/root/neutron-lbaas
+
+- name: make neutron dir
+  file: owner=neutron group=neutron state=directory path=/etc/neutron
+
+- name: make neutron log dir
+  file: owner=neutron group=neutron state=directory path=/var/log/neutron
+
+- name: install the neutron etc dir files
+  copy: src=/root/neutron/etc/ dest=/etc/neutron/
+
+- name: install the neutron etc dir files
+  copy: src=/root/neutron/etc/neutron/plugins dest=/etc/neutron/
+
+- name: install the neutron etc dir files
+  copy: src=/root/neutron/etc/neutron/rootwrap.d  dest=/etc/neutron/
+
+- name: Copy the neutron-lbaas rootwrap files
+  copy: src=/root/neutron-lbaas/etc/neutron/rootwrap.d/ dest=/etc/neutron/rootwrap.d
+
+- name: Copy neutron sudoers file
+  copy: src=neutron_sudoers dest=/etc/sudoers.d/neutron_sudoers mode=440
+
+- name: install the neutron files
+  shell: pip install -U .
+  args:
+     chdir: /root/neutron
+
+- name: install the neutron-lbaas files
+  shell: pip install -U .
+  args:
+     chdir: /root/neutron-lbaas
+
+- name: Setup DB for neutron
+  shell: creates=/var/lib/mysql/neutron mysql -u root -p{{ mysql_root_pass }} -e "CREATE DATABASE neutron;"
+
+- name: Give rights to neutron user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=neutron password={{ neutron_db_pass }} priv=*.*:ALL host='localhost' state=present
+
+- name: Give rights to neutron user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=neutron password={{ neutron_db_pass }} priv=*.*:ALL host='%' state=present
+
+- name: Copy the neutron.conf  configuration files 
+  template: src=liberty-neutron.conf.j2 dest=/etc/neutron/neutron.conf
+  notify:  restart neutron
+  when: openstack_version == "stable/liberty"
+
+- name: Copy the neutron.conf  configuration files 
+  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf
+  notify:  restart neutron
+  when: openstack_version != "stable/liberty"
+  
+- name: make ml2 directory
+  file: path=/etc/neutron/plugins/ml2 state=directory
+  
+- name: Copy the ml2_conf.ini for OVS configuration files 
+  template: src=ovs_neutron_plugin.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini
+  notify:  restart neutron
+  when: ml2_environment == 'openvswitch'
+
+- name: Copy the ml2_conf.ini for Linux bridge configuration files 
+  template: src=lb_neutron_plugin.ini.j2 dest=/etc/neutron/plugins/ml2/ml2_conf.ini
+  notify:  restart neutron
+  when: ml2_environment == 'linuxbridge'
+
+- name: set ownership of the directory
+  file: owner=root group=neutron path=/etc/neutron/plugins/ml2 state=directory
+
+- name: Initialize neutron database
+  shell: neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head; touch /etc/neutron/db.synced creates=/etc/neutron/db.synced
+
+- name: Copy the neutron dhcp agent liberty configuration files 
+  template: src=liberty-dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini
+  when: openstack_version == "stable/liberty"
+
+- name: Copy the neutron dhcp agent configuration files 
+  template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini
+  when: openstack_version != "stable/liberty"
+
+- name: Copy the neutron l3 agent liberty configuration files 
+  template: src=liberty-l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini
+  when: openstack_version == "stable/liberty"
+
+- name: Copy the neutron l3 agent configuration files 
+  template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini
+  when: openstack_version != "stable/liberty"
+
+- name: Copy the neutron lbaasv2 agent configuration files 
+  template: src=lbaas_agent.ini.j2 dest=/etc/neutron/lbaas_agent.ini
+
+- name: Copy the neutron metadata agent configuration file
+  template: src=metadata_agent.ini.j2 dest=/etc/neutron/metadata_agent.ini
+  notify: restart neutron
+
+- name: Copy the default
+  copy: src=neutron-default.conf dest=/etc/default/neutron-server
+
+- name: Copy the neutron server upstart files
+  copy: src=neutron-server.conf dest=/etc/init/neutron-server.conf
+  notify: restart neutron
+
+- name: Copy the dhcp upstart files
+  copy: src=neutron-dhcp-agent.conf dest=/etc/init/neutron-dhcp-agent.conf
+  notify: restart neutron
+
+- name: Copy the l3 upstart files
+  copy: src=neutron-l3-agent.conf dest=/etc/init/neutron-l3-agent.conf
+  notify: restart neutron
+
+- name: Copy the metadata upstart files
+  copy: src=neutron-metadata-agent.conf dest=/etc/init/neutron-metadata-agent.conf
+  notify: restart neutron
+
+- name: Copy the lbaas upstart files to root's home dir for use later
+  copy: src=neutron-lbaas-agentv2.conf dest=/root/neutron-lbaas-agent.conf
+  notify: restart neutron
+
+- name: Copy the openvswitch upstart files
+  copy: src=neutron-openvswitch-agent dest=/etc/init/neutron-openvswitch-agent.conf
+  when: ml2_environment == 'openvswitch'
+  notify: restart neutron
+
+- name: Copy the linuxbridgeupstart files
+  copy: src=neutron-linuxbridge-agent dest=/etc/init/neutron-linuxbridge-agent.conf
+  when: ml2_environment == 'linuxbridge'
+  notify: restart neutron
+
+- name: Start the services for neutron
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+   - neutron-server
+   - neutron-dhcp-agent
+   - neutron-l3-agent
+   - neutron-metadata-agent
+
+- name: Start the openvswitch neutron services
+  service: name=neutron-openvswitch-agent state=started enabled=yes
+  when: ml2_environment == 'openvswitch'
+
+- name: Start the linuxbridge neutron services
+  service: name=neutron-linuxbridge-agent state=started enabled=yes
+  when: ml2_environment == 'linuxbridge'
+
+

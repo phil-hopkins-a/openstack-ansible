@@ -1,0 +1,48 @@
+---
+## Do nt use not tested
+# Tasks for the cinder controller node
+
+- name: Install OpenStack Nova  packages.
+  apt: pkg={{ item }} state=latest
+  with_items:
+     - cinder-api
+     - cinder-scheduler
+     - cinder-volume
+     - python-cinderclient
+   
+- name: Setup DB for cinder
+  shell: creates=/var/lib/mysql/cinder mysql -u root -p{{ mysql_root_pass }} -e "CREATE DATABASE cinder;"
+
+- name: Give rights to cinder user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=cinder password={{ cinder_db_pass }} priv=*.*:ALL host='localhost' state=present
+
+- name: Give rights to cinder user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=cinder password={{ cinder_db_pass }} priv=*.*:ALL host='%' state=present
+
+- name: copy configuration file for nova
+  template: src=cinder.conf.j2 dest=/etc/cinder/cinder.conf
+  notify: restart cinder
+
+- name: copy tgt configuration file for nova
+  template: src=targets.conf.j2 dest=/etc/tgt/targets.conf
+  notify: restart tgt
+
+- name: start the tgt service
+  service: name=tgt state=started enabled=yes
+
+- name: DB sync for the nova services
+  shell: cinder-manage db sync; touch /etc/cinder/db.synced
+         creates=/etc/cinder/db.synced
+
+- name: create the volume group for cinder
+  shell: vgcreate cinder-volumes {{ cinder_volume_dev }} 
+         creates=/etc/lvm/backup/cinder-volumes
+
+- name: Start the services for cinder
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+   - cinder-api
+   - cinder-scheduler
+   - cinder-volume
+
+

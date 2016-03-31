@@ -1,0 +1,151 @@
+---
+# Tasks for the keystone controller node
+
+- name: set mysql to listen on the controller management IP
+  shell: sed -i "s/127.0.0.1/{{ hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address }}\nskip-name-resolve\ncharacter-set-server = utf8\ncollation-server = utf8_general_ci\ninit-connect = 'SET NAMES utf8'/g" /etc/mysql/my.cnf
+  
+- name: restart mysql to take the config changes
+  service: name=mysql state=restarted enabled=yes
+   
+#- name: Eliminate certain database connection issues
+#  shell: creates=/etc/keystone/db.secure mysql_secure_installation; touch /etc/keystone/db.secure
+  
+- name: change RabbitMQ default guest password
+  shell: rabbitmqctl change_password {{ rabbit_user }} {{ rabbit_pass }}
+
+- name: Setup DB for keystone
+  shell: creates=/var/lib/mysql/keystone mysql -u root -p{{ mysql_root_pass }} -e "CREATE DATABASE keystone;"
+  
+- name: Give right to keystone user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=keystone password={{ keystone_db_pass }} priv=*.*:ALL host='%' state=present
+
+- name: Give right to keystone user.
+  mysql_user: login_user=root login_password={{ mysql_root_pass }} name=keystone password={{ keystone_db_pass }} priv=*.*:ALL host='{{ hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address }}' state=present
+
+- name: Give right to keystone user.
+  mysql_user: login_user=root login_password=mysql name=keystone password={{ keystone_db_pass }} priv=*.*:ALL host='localhost' state=present
+
+- name: Create certs for the keystone
+  shell: creates=/etc/keystone/ssl/certs/ca.pem /usr/local/bin/keystone-manage pki_setup --keystone-user keystone --keystone-group keystone; chmod 777 /var/lock
+
+- name: pip install glanceclient keystoneclient
+  shell: pip install python-glanceclient python-keystoneclient python-openstackclient
+
+- name: pip upgrade keystoneclient glanceclient
+  shell: pip install --upgrade python-glanceclient python-keystoneclient
+
+- name: pip install additional packages
+  shell: pip install repoze.lru pbr mysql-python
+
+- name: Create the keystone user
+  user: home="/var/lib/keystone" createhome=yes system=yes shell=/bin/false name=keystone
+  
+- name: Create the horizon user
+  user: home="/usr/local/lib/python2.7/dist-packages/openstack_dashboard" createhome=yes system=yes shell=/bin/false name=horizon
+
+- name: make keystone log dir
+  file: owner=keystone group=keystone state=directory path=/var/log/keystone
+  
+- name: make keystone lib dir
+  file: owner=keystone group=keystone state=directory path=/var/lib/keystone
+  
+- name: make keystone ssl cert dir
+  file: owner=keystone group=keystone state=directory path=/etc/keystone/ssl
+
+- name: use git to clone the keystone git repo
+  git:  repo=https://github.com/openstack/keystone.git version={{openstack_version}}
+        dest=/root/keystone
+  
+- name: install the keystone etc dir files
+  shell: cp -R keystone/etc/* /etc/keystone/
+  args:
+     chdir: /root
+
+- name: correct the name for the keystone conf file
+  shell: mv /etc/keystone/keystone.conf.sample /etc/keystone/keystone.conf
+
+- name: install the keystone files
+  shell: pip install -U .
+  args:
+     chdir: /root/keystone
+
+#- name: set mysql connection parameters
+#  shell: sed -i "s|database]|database]\nconnection = mysql://keystone:{{ keystone_db_pass }}@{{ controller_mgmt_ip }}/keystone|g" /etc/keystone/keystone.conf
+  
+#- name: set the keystone admin token
+#  shell: sed -i 's/#admin_token=ADMIN/admin_token={{ keystone_admin_token }}/g' /etc/keystone/keystone.conf 
+  
+- name: Copy the configuration files for keystone
+  template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf 
+#  notify: restart keystone 
+
+- name: Copy the configuration files for apache2
+  template: src=wsgi-keystone.conf.j2 dest=/etc/apache2/sites-available/wsgi-keystone.conf
+
+- name: set apache user run parameters
+  shell: sed -i 's/export APACHE_RUN_USER=www-data/export APACHE_RUN_USER=horizon/g' /etc/apache2/envvars
+
+- name: set apache group run parameters
+  shell: sed -i 's/export APACHE_RUN_GROUP=www-data/export APACHE_RUN_GROUP=horizon/g' /etc/apache2/envvars
+
+- name: enable the keystone apache site
+  shell: a2ensite wsgi-keystone
+
+- name: Change ownership of all files to keystone
+  file: path=/etc/keystone recurse=yes owner=keystone group=keystone state=directory
+
+- name: Change ownership of all files to keystone
+  file: path=/var/lib/keystone recurse=yes owner=keystone group=keystone state=directory
+
+- name: Change ownership of all files to keystone
+  file: path=/var/log/keystone recurse=yes owner=keystone group=keystone state=directory
+
+- name: DB sync for keystone
+  shell: creates=/etc/keystone/db.synced /usr/local/bin/keystone-manage db_sync; touch /etc/keystone/db.synced
+
+- name: Copy the file for data insertion into keystone
+  template: src=keystone_data.sh.j2 dest=/tmp/keystone_data.sh mode=0755
+  when: openstack_version != "stable/liberty"
+
+- name: Copy the file for data insertion into keystone
+  template: src=liberty_keystone_data.sh.j2 dest=/tmp/liberty_keystone_data.sh mode=0755
+  when: openstack_version == "stable/liberty"
+
+- name: Copy the keystonerc file
+  template: src=keystonerc.j2 dest=/root/keystonerc mode=0755
+
+- name: Copy the adminrc file for v2 auth
+  template: src=adminrc.j2 dest=/root/adminrc mode=0755
+
+- name: Copy the keystone log rotate file
+  copy: src=keystone-logrotate dest=/etc/logrotate.d/keystone
+  
+- name: Start the services for keystone
+  service: name=apache2 state=restarted enabled=yes
+  with_items:
+      - apache2
+  
+- name: set admin token for keystone
+  shell: sed -i "s/verbose=true/verbose=true\nadmin_token=SECRETTOKEN\n/g" /etc/keystone/keystone.conf
+  when: openstack_version == "stable/liberty"
+
+- name: Restart the apache service for keystone
+  service: name=apache2 state=restarted enabled=yes
+  with_items:
+      - apache2
+
+- name: wait for apache to restart and settle
+  shell: sleep 10
+  
+- name: Bootstrap a admin user for keystone (mitaka release and after)
+  shell: keystone-manage bootstrap --bootstrap-password {{ admin_pass }}
+  when: openstack_version != "stable/liberty"
+
+- name: Upload the data to keystone database
+  shell: creates=/etc/keystone/db.updated /tmp/keystone_data.sh; touch /etc/keystone/db.updated
+  when: openstack_version != "stable/liberty"
+
+- name: Upload the data to keystone database
+  shell: creates=/etc/keystone/db.updated /tmp/liberty_keystone_data.sh; touch /etc/keystone/db.updated
+  when: openstack_version == "stable/liberty"
+
