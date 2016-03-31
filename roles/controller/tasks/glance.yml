@@ -28,6 +28,7 @@
   
 - name: install the glance etc dir files
   shell: cp -R glance/etc/* /etc/glance/
+  args:
      chdir: /root
      
 - name: install the glance files

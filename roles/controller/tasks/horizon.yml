@@ -1,13 +1,13 @@
 ---
 # Tasks for the Horizon controller node
-# Note: need to fix the horizon install method - this way does not work with Mitaka
 
 - name: Clone Horizon directory
-  git: repo=https://github.com/openstack/horizon.git  version={{openstack_version}}
+  git: repo=https://github.com/openstack/horizon.git version={{openstack_version}}
        dest=/root/horizon
-       
+
 - name: Install horizon files
   shell: pip install -U .
+  args:
     chdir: /root/horizon
 
 - name: Make directory in var/lib
@@ -23,11 +23,13 @@
   template: src=local_settings.j2 dest=/root/horizon/openstack_dashboard/local/local_settings.py
 
 - name: Build the wsgi file
-  shell: manage.py make_web_conf --wsgi
+  shell: /root/horizon/manage.py make_web_conf --wsgi
+  args:
     chdir: /root/horizon
 
 - name: Build the apache conf file
-  shell: manage.py make_web_conf --apache > /etc/apache2/sites-available/horizon.conf
+  shell: /root/horizon/manage.py make_web_conf --apache > /etc/apache2/sites-available/openstack.conf
+  args:
     chdir: /root/horizon
 
 #- name: remove some files placed in the wrong directory
@@ -81,7 +83,7 @@
   with_items:
        - libjs-jquery
        - libjs-sphinxdoc 
-       - libjs-swfobject 
+#       - libjs-swfobject 
        - libjs-underscore
 
 - name: copy the novnc upstart file

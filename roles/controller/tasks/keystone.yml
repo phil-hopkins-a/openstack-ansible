@@ -58,6 +58,7 @@
   
 - name: install the keystone etc dir files
   shell: cp -R keystone/etc/* /etc/keystone/
+  args:
      chdir: /root
 
 - name: correct the name for the keystone conf file

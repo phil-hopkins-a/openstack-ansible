@@ -16,14 +16,17 @@
 
 - name: install the nova etc dir files
   shell: cp -r nova/etc/nova/* /etc/nova/
+  args:
      chdir: /root 
 
 - name: install the nova etc dir files
   shell: cp -R nova/etc/nova/rootwrap.d/* /etc/nova/rootwrap.d
+  args:
      chdir: /root  
 
 - name: install the nova files
   shell: pip install -U .
+  args:
      chdir: /root/nova
 
 - name: Setup DB for nova

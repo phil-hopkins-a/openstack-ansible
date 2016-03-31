@@ -35,10 +35,12 @@
 
 - name: install the neutron files
   shell: pip install -U .
+  args:
      chdir: /root/neutron
 
 - name: install the neutron-lbaas files
   shell: pip install -U .
+  args:
      chdir: /root/neutron-lbaas
 
 - name: Setup DB for neutron
