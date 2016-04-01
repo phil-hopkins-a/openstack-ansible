@@ -2,7 +2,7 @@
 # Tasks for the keystone controller node
 
 - name: set mysql to listen on the controller management IP
-  shell: sed -i "s/127.0.0.1/{{ hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address }}\nskip-name-resolve\ncharacter-set-server = utf8\ncollation-server = utf8_general_ci\ninit-connect = 'SET NAMES utf8'/g" /etc/mysql/my.cnf
+  lineinfile: dest=/etc/mysql/my.cnf regexp="127.0.0.1" line="bind-address            = {{ hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address }}\nskip-name-resolve\ncharacter-set-server = utf8\ncollation-server = utf8_general_ci\ninit-connect = 'SET NAMES utf8'" 
   
 - name: restart mysql to take the config changes
   service: name=mysql state=restarted enabled=yes
@@ -70,11 +70,11 @@
      chdir: /root/keystone
 
 #- name: set mysql connection parameters
-#  shell: sed -i "s|database]|database]\nconnection = mysql://keystone:{{ keystone_db_pass }}@{{ controller_mgmt_ip }}/keystone|g" /etc/keystone/keystone.conf
+#  lineinfile: dest=/etc/keystone/keystone.conf regexp="[database]" line="[database]\nconnection = mysql://keystone:{{ keystone_db_pass }}@{{ controller_mgmt_ip }}/keystone" 
   
 #- name: set the keystone admin token
 #  shell: sed -i 's/#admin_token=ADMIN/admin_token={{ keystone_admin_token }}/g' /etc/keystone/keystone.conf 
-  
+
 - name: Copy the configuration files for keystone
   template: src=keystone.conf.j2 dest=/etc/keystone/keystone.conf 
 #  notify: restart keystone 
@@ -83,10 +83,10 @@
   template: src=wsgi-keystone.conf.j2 dest=/etc/apache2/sites-available/wsgi-keystone.conf
 
 - name: set apache user run parameters
-  shell: sed -i 's/export APACHE_RUN_USER=www-data/export APACHE_RUN_USER=horizon/g' /etc/apache2/envvars
+  lineinfile: dest=/etc/apache2/envvars regexp='export APACHE_RUN_USER=www-data' line='export APACHE_RUN_USER=horizon'
 
 - name: set apache group run parameters
-  shell: sed -i 's/export APACHE_RUN_GROUP=www-data/export APACHE_RUN_GROUP=horizon/g' /etc/apache2/envvars
+  lineinfile: dest=/etc/apache2/envvars regexp='export APACHE_RUN_GROUP=www-data' line='export APACHE_RUN_GROUP=horizon'
 
 - name: enable the keystone apache site
   shell: a2ensite wsgi-keystone
@@ -126,7 +126,7 @@
       - apache2
   
 - name: set admin token for keystone
-  shell: sed -i "s/verbose=true/verbose=true\nadmin_token=SECRETTOKEN\n/g" /etc/keystone/keystone.conf
+  lineinfile: dest=/etc/keystone/keystone.conf regexp="verbose=true" line="verbose=true\nadmin_token=SECRETTOKEN\n" 
   when: openstack_version == "stable/liberty"
 
 - name: Restart the apache service for keystone

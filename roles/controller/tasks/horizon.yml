@@ -51,7 +51,7 @@
 #  file: src=/etc/openstack_dashboard/local_settings.py dest=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/local/local_settings.py state=link
 
 - name: Fix the v3 keystone policy file
-  shell: sed -i 's/"cloud_admin": "role:admin and (token.is_admin_project:True or domain_id:admin_domain_id)",/"cloud_admin": "rule:admin_required and domain_id:admin_domain_id",/g' /etc/keystone/policy.v3cloudsample.json
+  lineinfile: dest=/etc/keystone/policy.v3cloudsample.json regexp='"cloud_admin": "role:admin and (token.is_admin_project:True or domain_id:admin_domain_id)",' line='"cloud_admin": "rule:admin_required and domain_id:admin_domain_id",' 
 
 - name: copy the v3 policy file to where horizon expects it
   copy: src=/etc/keystone/policy.v3cloudsample.json dest=/root/horizon/openstack_dashboard/conf/
