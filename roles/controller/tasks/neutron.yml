@@ -60,8 +60,13 @@
 - name: Copy the neutron.conf  configuration files 
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf
   notify:  restart neutron
-  when: openstack_version != "stable/liberty"
-  
+  when: openstack_version == "stable/mitaka"
+
+- name: Copy the neutron.conf  configuration files 
+  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf
+  notify:  restart neutron
+  when: openstack_version == "HEAD"
+
 - name: make ml2 directory
   file: path=/etc/neutron/plugins/ml2 state=directory
   
@@ -87,7 +92,11 @@
 
 - name: Copy the neutron dhcp agent configuration files 
   template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini
-  when: openstack_version != "stable/liberty"
+  when: openstack_version == "stable/mitaka"
+
+- name: Copy the neutron dhcp agent configuration files 
+  template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini
+  when: openstack_version == "HEAD"
 
 - name: Copy the neutron l3 agent liberty configuration files 
   template: src=liberty-l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini
@@ -95,7 +104,11 @@
 
 - name: Copy the neutron l3 agent configuration files 
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini
-  when: openstack_version != "stable/liberty"
+  when: openstack_version == "stable/mitaka"
+
+- name: Copy the neutron l3 agent configuration files 
+  template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini
+  when: openstack_version == "HEAD"
 
 - name: Copy the neutron lbaasv2 agent configuration files 
   template: src=lbaas_agent.ini.j2 dest=/etc/neutron/lbaas_agent.ini

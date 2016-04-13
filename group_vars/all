@@ -10,9 +10,10 @@ interface_driv: neutron.agent.linux.interface.BridgeInterfaceDriver
 
 #set the version
 #openstack_version: "stable/liberty"
+openstack_version: "stable/mitaka"
 
 #For installing from trunk
-openstack_version: "HEAD"
+#openstack_version: "HEAD"
 
 rabbit_user: guest
 rabbit_pass: secret
