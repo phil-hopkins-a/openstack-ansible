@@ -50,8 +50,8 @@
 #- name: link the settings directory
 #  file: src=/etc/openstack_dashboard/local_settings.py dest=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/local/local_settings.py state=link
 
-- name: Fix the v3 keystone policy file
-  lineinfile: dest=/etc/keystone/policy.v3cloudsample.json regexp='"cloud_admin": "role:admin and (token.is_admin_project:True or domain_id:admin_domain_id)",' line='"cloud_admin": "rule:admin_required and domain_id:admin_domain_id",' 
+#- name: Fix the v3 keystone policy file
+#  lineinfile: dest=/etc/keystone/policy.v3cloudsample.json regexp='"cloud_admin": "role:admin and (token.is_admin_project:True or domain_id:admin_domain_id)",' line='"cloud_admin": "rule:admin_required and domain_id:admin_domain_id",' 
 
 - name: Fix the v3 keystone policy file
   replace: dest=/etc/keystone/policy.v3cloudsample.json regexp='role:admin and (token.is_admin_project:True or domain_id:admin_domain_id)' line='rule:admin_required and domain_id:admin_domain_id'
