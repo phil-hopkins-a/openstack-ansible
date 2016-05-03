@@ -70,18 +70,63 @@
 
 - name: Copy the nova-api upstart files
   copy: src=nova-api.conf dest=/etc/init/nova-api.conf
+  when: ubuntu == "u1404"
+
+- name: Copy the api systemd file
+  copy: src=nova-api.service dest=/lib/systemd/system/nova-api.service
+  when: ubuntu == "u1604"
+
+- name: Copy the api systemd init file
+  copy: src=nova-api dest=/etc/init.d/nova-api mode=755
+  when: ubuntu == "u1604"
 
 - name: Copy the nova-cert upstart files
   copy: src=nova-cert.conf dest=/etc/init/nova-cert.conf
+  when: ubuntu == "u1404"
+
+- name: Copy the cert systemd file
+  copy: src=nova-cert.service dest=/lib/systemd/system/nova-cert.service
+  when: ubuntu == "u1604"
+
+- name: Copy the cert systemd init file
+  copy: src=nova-cert dest=/etc/init.d/nova-cert mode=755
+  when: ubuntu == "u1604"
 
 - name: Copy the nova-consoleauth upstart files
   copy: src=nova-consoleauth.conf dest=/etc/init/nova-consoleauth.conf
+  when: ubuntu == "u1404"
 
-- name: Copy the nova-conducto upstart files
+- name: Copy the consoleauth systemd file
+  copy: src=nova-consoleauth.service dest=/lib/systemd/system/nova-consoleauth.service
+  when: ubuntu == "u1604"
+
+- name: Copy the consoleauth systemd init file
+  copy: src=nova-consoleauth dest=/etc/init.d/nova-consoleauth mode=755
+  when: ubuntu == "u1604"
+
+- name: Copy the nova-conductor upstart files
   copy: src=nova-conductor.conf dest=/etc/init/nova-conductor.conf
+  when: ubuntu == "u1404"
+
+- name: Copy the conductor systemd file
+  copy: src=nova-conductor.service dest=/lib/systemd/system/nova-conductor.service
+  when: ubuntu == "u1604"
+
+- name: Copy the conductor systemd init file
+  copy: src=nova-conductor dest=/etc/init.d/nova-conductor mode=755
+  when: ubuntu == "u1604"
 
 - name: Copy the nova-scheduler upstart files
   copy: src=nova-scheduler.conf dest=/etc/init/nova-scheduler.conf
+  when: ubuntu == "u1404"
+
+- name: Copy the scheduler systemd file
+  copy: src=nova-scheduler.service dest=/lib/systemd/system/nova-scheduler.service
+  when: ubuntu == "u1604"
+
+- name: Copy the conductor systemd init file
+  copy: src=nova-scheduler dest=/etc/init.d/nova-scheduler mode=755
+  when: ubuntu == "u1604"
 
 - name: remove libvirt default network
   file: path=/etc/libvirt/qemu/networks/autostart/default.xml state=absent

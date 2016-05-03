@@ -3,15 +3,28 @@
 
 - name: set mysql to listen on the controller management IP
   lineinfile: dest=/etc/mysql/my.cnf regexp="127.0.0.1" line="bind-address            = {{ hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address }}\nskip-name-resolve\ncharacter-set-server = utf8\ncollation-server = utf8_general_ci\ninit-connect = 'SET NAMES utf8'" 
+  when: ubuntu=="u1404"
+
+- name: set mysql to listen on the controller management IP
+  lineinfile: dest=/etc/mysql/mysql.conf.d/mysqld.cnf regexp="127.0.0.1" line="bind-address            = {{ hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address }}\nskip-name-resolve\ncharacter-set-server = utf8\ncollation-server = utf8_general_ci\ninit-connect = 'SET NAMES utf8'" 
+  when: ubuntu=="u1604"
   
 - name: restart mysql to take the config changes
   service: name=mysql state=restarted enabled=yes
    
 #- name: Eliminate certain database connection issues
 #  shell: creates=/etc/keystone/db.secure mysql_secure_installation; touch /etc/keystone/db.secure
-  
+
+- name: set permissions for the new rabbit user
+  shell: creates=/etc/rabbitmq/newuser rabbitmqctl add_user {{ rabbit_user }} {{ rabbit_pass }}; touch /etc/rabbitmq/newuser
+  when: guest!="{{ rabbit_user }}"
+
 - name: change RabbitMQ default guest password
   shell: rabbitmqctl change_password {{ rabbit_user }} {{ rabbit_pass }}
+  when: guest=="{{ rabbit_user }}"
+
+- name: set permissions for the new rabbit user
+  shell: rabbitmqctl set_permissions {{ rabbit_user }} ".*" ".*" ".*"
 
 - name: Setup DB for keystone
   shell: creates=/var/lib/mysql/keystone mysql -u root -p{{ mysql_root_pass }} -e "CREATE DATABASE keystone;"

@@ -80,6 +80,9 @@
   notify:  restart neutron
   when: ml2_environment == 'linuxbridge'
 
+- name: create an empty fwaas conf file
+  file: path=/etc/neutron/fwaas_driver.ini state=touch owner=neutron group=neutron
+
 - name: set ownership of the directory
   file: owner=root group=neutron path=/etc/neutron/plugins/ml2 state=directory
 
@@ -123,32 +126,127 @@
 - name: Copy the neutron server upstart files
   copy: src=neutron-server.conf dest=/etc/init/neutron-server.conf
   notify: restart neutron
+  when: ubuntu == "u1404"
+
+- name: Copy the neutron server systemd file
+  copy: src=neutron-server.service dest=/lib/systemd/system/neutron-server.service
+  notify: restart neutron
+  when: ubuntu == "u1604"
+
+- name: Copy the neutron server systemd init file
+  copy: src=neutron-server dest=/etc/init.d/neutron-server mode=755
+  notify: restart neutron
+  when: ubuntu == "u1604"
 
 - name: Copy the dhcp upstart files
   copy: src=neutron-dhcp-agent.conf dest=/etc/init/neutron-dhcp-agent.conf
   notify: restart neutron
+  when: ubuntu == "u1404"
+
+- name: Copy the neutron dhcp systemd file
+  copy: src=neutron-dhcp-agent.service dest=/lib/systemd/system/neutron-dhcp-agent.service
+  notify: restart neutron
+  when: ubuntu == "u1604"
+
+- name: Copy the neutron dhcp systemd init file
+  copy: src=neutron-dhcp-agent dest=/etc/init.d/neutron-dhcp-agent mode=755
+  notify: restart neutron
+  when: ubuntu == "u1604"
 
 - name: Copy the l3 upstart files
   copy: src=neutron-l3-agent.conf dest=/etc/init/neutron-l3-agent.conf
   notify: restart neutron
+  when: ubuntu == "u1404"
+
+- name: Copy the neutron l3 systemd file
+  copy: src=neutron-l3-agent.service dest=/lib/systemd/system/neutron-l3-agent.service
+  notify: restart neutron
+  when: ubuntu == "u1604"
+
+- name: Copy the neutron l3 systemd init file
+  copy: src=neutron-l3-agent dest=/etc/init.d/neutron-l3-agent mode=755
+  notify: restart neutron
+  when: ubuntu == "u1604"
 
 - name: Copy the metadata upstart files
   copy: src=neutron-metadata-agent.conf dest=/etc/init/neutron-metadata-agent.conf
   notify: restart neutron
+  when: ubuntu == "u1404"
+
+- name: Copy the neutron metadata systemd file
+  copy: src=neutron-metadata-agent.service dest=/lib/systemd/system/neutron-metadata-agent.service
+  notify: restart neutron
+  when: ubuntu == "u1604"
+
+- name: Copy the neutron metadata systemd init file
+  copy: src=neutron-metadata-agent dest=/etc/init.d/neutron-metadata-agent mode=755
+  notify: restart neutron
+  when: ubuntu == "u1604"
 
 - name: Copy the lbaas upstart files to root's home dir for use later
   copy: src=neutron-lbaas-agentv2.conf dest=/root/neutron-lbaas-agent.conf
   notify: restart neutron
+  when: ubuntu == "u1404"
+
+- name: Copy the neutron lbaasv2 systemd file
+  copy: src=neutron-lbaasv2-agent.service dest=/lib/systemd/system/neutron-lbaasv2-agent.service
+  notify: restart neutron
+  when: ubuntu == "u1604"
+
+- name: Copy the neutron lbaasv2 systemd init file
+  copy: src=neutron-lbaasv2-agent dest=/etc/init.d/neutron-lbaasv2-agent mode=755
+  notify: restart neutron
+  when: ubuntu == "u1604"
 
 - name: Copy the openvswitch upstart files
   copy: src=neutron-openvswitch-agent dest=/etc/init/neutron-openvswitch-agent.conf
-  when: ml2_environment == 'openvswitch'
+  when: ml2_environment == 'openvswitch' and ubuntu == "u1404"
   notify: restart neutron
+
+- name: Copy the neutron openvswitch systemd file
+  copy: src=neutron-openvswitch-agent.service dest=/lib/systemd/system/neutron-openvswitch-agent.service
+  notify: restart neutron
+  when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
+
+- name: Copy the neutron openvswitch systemd init file
+  copy: src=neutron-openvswitch-agent dest=/etc/init.d/neutron-openvswitch-agent mode=755
+  notify: restart neutron
+  when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
+
+- name: Copy the neutron ovs-cleanup systemd file
+  copy: src=neutron-ovs-cleanup.service dest=/lib/systemd/system/neutron-ovs-cleanup.service
+  notify: restart neutron
+  when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
+
+- name: Copy the neutron openvswitch systemd init file
+  copy: src=neutron-ovs-cleanup dest=/etc/init.d/neutron-ovs-cleanup mode=755
+  notify: restart neutron
+  when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
 - name: Copy the linuxbridgeupstart files
   copy: src=neutron-linuxbridge-agent dest=/etc/init/neutron-linuxbridge-agent.conf
-  when: ml2_environment == 'linuxbridge'
+  when: ml2_environment == 'linuxbridge' and ubuntu == "u1404"
   notify: restart neutron
+
+- name: Copy the neutron linuxbridge systemd file
+  copy: src=neutron-linuxbridge-agent.service dest=/lib/systemd/system/neutron-linuxbridge-agent.service
+  notify: restart neutron
+  when: ml2_environment == 'linuxbridge' and ubuntu == "u1604"
+
+- name: Copy the neutron linuxbridge systemd init file
+  copy: src=neutron-linuxbridge-agent dest=/etc/init.d/neutron-linuxbridge-agent mode=755
+  notify: restart neutron
+  when: ml2_environment == 'linuxbridge' and ubuntu == "u1604"
+
+- name: Copy the neutron linuxbridge-cleanup systemd file
+  copy: src=neutron-linuxbridge-cleanup.service dest=/lib/systemd/system/neutron-linuxbridge-cleanup.service
+  notify: restart neutron
+  when: ml2_environment == 'linuxbridge' and ubuntu == "u1604"
+
+- name: Copy the neutron linuxbridge systemd init file
+  copy: src=neutron-linuxbridge-cleanup dest=/etc/init.d/neutron-linuxbridge-cleanup mode=755
+  notify: restart neutron
+  when: ml2_environment == 'linuxbridge' and ubuntu == "u1604"
 
 - name: Start the services for neutron
   service: name={{ item }} state=started enabled=yes

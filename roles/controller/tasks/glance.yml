@@ -64,9 +64,27 @@
 
 - name: Copy the upstart file
   copy: src=glance-api.conf dest=/etc/init/glance-api.conf
+  when: ubuntu == "u1404"
   
 - name: Copy the upstart file
   copy: src=glance-registry.conf dest=/etc/init/glance-registry.conf
+  when: ubuntu == "u1404"
+
+- name: Copy the api systemd file
+  copy: src=glance-api.service dest=/lib/systemd/system/glance-api.service
+  when: ubuntu == "u1604"
+
+- name: Copy the api systemd init file
+  copy: src=glance-api dest=/etc/init.d/glance-api mode=755
+  when: ubuntu == "u1604"
+
+- name: Copy the registry systemd file
+  copy: src=glance-registry.service dest=/lib/systemd/system/glance-registry.service
+  when: ubuntu == "u1604"
+
+- name: Copy the systemd init file
+  copy: src=glance-registry dest=/etc/init.d/glance-registry mode=755
+  when: ubuntu == "u1604"
   
 - name: Copy the glance log rotate file
   copy: src=glance-logrotate dest=/etc/logrotate.d/glance

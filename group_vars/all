@@ -1,4 +1,7 @@
 ---
+# Ubuntu Version either 1404 or 1604 - experimental
+
+ubuntu: u1604
 # Variables for openstack
 
 #Is this a linux bridge or openvswitch environment
@@ -36,18 +39,6 @@ neutron_pass: neutron
 neutron_external_interface: eth2
 
 swift_pass: swift
-
-# Interface for management, API 
-ifaceM: eth1
-
-# Interface VXLAN tunnels for instance traffic
-ifaceD: eth0
-
-# Interface for access
-ifaceA: eth2
-
-# external interface
-ifaceE: eth3
 
 cinder_db_pass: cinder
 cinder_pass: cinder

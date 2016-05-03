@@ -54,6 +54,15 @@
 - name: Copy the nova-compute2 upstart files
   copy: src=nova-compute-agent dest=/etc/init/nova-compute.conf
   notify: restart nova-compute
+  when: ubuntu == "u1404"
+
+- name: Copy the compute systemd file
+  copy: src=nova-compute.service dest=/lib/systemd/system/nova-compute.service
+  when: ubuntu == "u1604"
+
+- name: Copy the compute systemd init file
+  copy: src=nova-compute dest=/etc/init.d/nova-compute mode=755
+  when: ubuntu == "u1604"
 
 - name: Start the nova compute2 service
   service: name=nova-compute state=started enabled=yes

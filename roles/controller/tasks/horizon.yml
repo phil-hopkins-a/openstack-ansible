@@ -5,13 +5,14 @@
   git: repo=https://github.com/openstack/horizon.git version={{openstack_version}}
        dest=/root/horizon
 
-- name: Install horizon files
-  shell: pip install -U .
-  args:
-    chdir: /root/horizon
-
-- name: Make directory in var/lib
+- name: Make directory in /var/lib
   file: path=/var/lib/openstack-dashboard state=directory owner=horizon group=horizon
+
+- name: Make directory in var/www
+  file: path=/var/www/static state=directory owner=horizon group=horizon
+
+- name: Make directory in /var/www
+  file: path=/var/www/wsgi state=directory owner=horizon group=horizon
 
 - name: make the /etc/openstack directory if not already there
   file: path=/etc/openstack_dashboard state=directory owner=horizon group=horizon
@@ -19,47 +20,56 @@
 - name: copy the openstack settings file
   template:  src=local_settings.j2 dest=/etc/openstack_dashboard/local_settings.py owner=horizon group=horizon
 
-- name: configure openstack_dashboard/local/local_settings.py
-  template: src=local_settings.j2 dest=/root/horizon/openstack_dashboard/local/local_settings.py
+- name: link the local settings file
+  file: src=/etc/openstack_dashboard/local_settings.py path=/root/horizon/openstack_dashboard/local/local_settings.py state=link
+
+- name: modify the STATIC_ROOT setting
+  replace: dest=/root/horizon/openstack_dashboard/settings.py regexp='STATIC_ROOT = <none>' replace='STATIC_ROOT = /var/www/static'
+
+- name: execute run_tests
+  shell: /root/horizon//run_tests.sh --compilemessages
+  args:
+    chdir: /root/horizon 
+
+- name: install horizon
+  shell: pip install -U .
+  args:
+     chdir: /root/horizon
 
 - name: Build the wsgi file
   shell: /root/horizon/manage.py make_web_conf --wsgi
   args:
     chdir: /root/horizon
 
+- name: copy the wsgi files
+  copy: src=/root/horizon/openstack_dashboard/wsgi/ dest=/var/www/wsgi owner=horizon group=horizon 
+
 - name: Build the apache conf file
   shell: /root/horizon/manage.py make_web_conf --apache > /etc/apache2/sites-available/openstack.conf
   args:
     chdir: /root/horizon
-
-#- name: remove some files placed in the wrong directory
-#  file: path=/usr/local/lib/python2.7/dist-packages/openstack_dashboard state=absent
-
-#- name: make the openstack_dashboard directory
-#  file: path=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard state=directory
-
-#- name: copy the files to the correct location
-#  shell: cp -r /root/horizon/openstack_dashboard/* /usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard
-
-#- name: change ownership of one directory and its subdirectories
-#  shell: chown -R horizon:horizon /usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/static/
-
-#- name: link static directories
-#  file: src=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/static dest=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/static state=link
-  
-#- name: link the settings directory
-#  file: src=/etc/openstack_dashboard/local_settings.py dest=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/local/local_settings.py state=link
 
 - name: Fix the v3 keystone policy file
   replace: dest=/etc/keystone/policy.v3cloudsample.json regexp='"cloud_admin"{{ ":" }} "role{{ ":" }}admin and \(token\.is_admin_project{{ ":" }}True or domain_id{{ ":" }}admin_domain_id\)",' replace='"cloud_admin"{{ ":" }} "rule{{ ":" }}admin_required and domain_id{{ ":" }}domain_id",' 
 
 - name: copy the v3 policy file to where horizon expects it
   copy: src=/etc/keystone/policy.v3cloudsample.json dest=/root/horizon/openstack_dashboard/conf/
-#  copy: src=/etc/keystone/policy.v3cloudsample.json dest=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/openstack_dashboard/conf/
 
-#- name: Copy the horizon apache conf file
-#  copy: src=horizon-openstack.conf dest=/etc/apache2/sites-available/openstack.conf
-v
+- name: link the fonts
+  file: src=/usr/local/lib/python2.7/dist-packages/xstatic/pkg/font_awesome/data/fonts path=/var/www/static/horizon/lib/font-awesome/fonts state=link
+
+- name: copy some static stuff
+  copy: src=horizon/openstack_dashboard/dashboards/project/static/dashboard/project dest=/var/www/static/dashboard/  owner=horizon group=horizon
+
+- name: copy more static stuff
+  copy: src=horizon/openstack_dashboard/dashboards/admin/static/dashboard/admin dest=/var/www/static/dashboard/  owner=horizon group=horizon
+
+- name: copy even more static
+  copy: src=/usr/local/lib/python2.7/dist-packages/static/ dest=/var/www/static owner=horizon group=horizon
+
+- name: add a link
+  file: src=/var/www/static path=/usr/local/lib/python2.7/dist-packages/static state=link
+
 - name: disable default site
   shell: a2dissite 000-default.conf
 
@@ -83,11 +93,22 @@ v
   with_items:
        - libjs-jquery
        - libjs-sphinxdoc 
-#       - libjs-swfobject 
+       - libjs-swfobject 
        - libjs-underscore
 
 - name: copy the novnc upstart file
   copy: src=nova-novncproxy.conf dest=/etc/init/nova-novncproxy.conf
+  when: ubuntu == "u1404"
+
+- name: Copy the nova novncproxy systemd file
+  copy: src=nova-novncproxy.service dest=/lib/systemd/system/nova-novncproxy.service
+  notify: restart neutron
+  when: ubuntu == "u1604"
+
+- name: Copy the nova novncproxy systemd init file
+  copy: src=nova-novncproxy dest=/etc/init.d/nova-novncproxy mode=755
+  notify: restart neutron
+  when: ubuntu == "u1604"
 
 - name: Start the novnc process
   service: name=nova-novncproxy state=started enabled=yes

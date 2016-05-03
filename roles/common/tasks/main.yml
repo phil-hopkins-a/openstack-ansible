@@ -3,7 +3,10 @@
 
 - name: Update the system
   apt: update_cache=yes
-  
+
+- name: install python2
+  apt: pkg=python state=latest
+
 - name: install prerequisites
   apt: pkg=python-software-properties state=latest
 
@@ -27,9 +30,9 @@
   with_items:
    - ntpdate
    - ntp
-#   - iscsitarget
    - python-pyudev
    - git
+   - python
    - python-pip
    - wget
 #   - python-mysqldb
@@ -46,6 +49,11 @@
   
 - name: update pip
   shell: pip install -U pip
+  when: ubuntu == "u1404"
+
+- name: update pip
+  shell: easy_install pip
+  when: ubuntu == "u1604"
 
 - name: remove old pip
   file: path=/usr/bin/pip state=absent
