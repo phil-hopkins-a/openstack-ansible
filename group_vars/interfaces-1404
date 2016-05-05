@@ -1,0 +1,11 @@
+# Interface for management, API 
+ifaceM: eth1
+
+# Interface VXLAN tunnels for instance traffic
+ifaceD: eth0
+
+# Interface for access
+ifaceA: eth2
+
+# external interface
+ifaceE: eth3

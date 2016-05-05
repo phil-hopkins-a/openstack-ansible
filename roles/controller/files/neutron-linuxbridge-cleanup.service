@@ -1,0 +1,16 @@
+[Unit]
+Description=OpenStack Neutron Linux bridge cleanup
+
+[Service]
+type=oneshot
+User=neutron
+Group=neutron
+WorkingDirectory=/var/lib/neutron
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/lock/neutron /var/log/neutron /var/lib/neutron
+ExecStartPre=/bin/chown neutron:neutron /var/lock/neutron /var/log/neutron /var/lib/neutron
+ExecStart=/etc/init.d/neutron-linuxbridge-cleanup systemd-start
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

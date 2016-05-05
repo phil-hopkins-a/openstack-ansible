@@ -1,0 +1,20 @@
+[Unit]
+Description=OpenStack Image Service Registry
+After=postgresql.service mysql.service ntp.service rabbitmq-server.service 
+
+
+[Service]
+User=glance
+Group=glance
+Type=simple
+WorkingDirectory=/var/lib/glance
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/lock/glance /var/log/glance /var/lib/glance
+ExecStartPre=/bin/chown glance:glance /var/lock/glance /var/log/glance /var/lib/glance
+ExecStart=/etc/init.d/glance-registry systemd-start
+Restart=on-failure
+LimitNOFILE=65535
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

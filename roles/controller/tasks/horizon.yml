@@ -100,7 +100,7 @@
   service:  name=apache2 state=restarted enabled=yes
   
 - name: correct /var/lib/openstack_dashboard permissions
-  shell: chown -R /var/lib/openstack_dashboard
+  shell: chown -R horizon:horizon /var/lib/openstack-dashboard
  
 - name: Clone the novnc repo
   git: repo=https://github.com/kanaka/noVNC dest=/root/noVNC
