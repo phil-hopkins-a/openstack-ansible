@@ -21,9 +21,10 @@ root_helper=sudo /usr/local/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
 [KEYSTONE_AUTHTOKEN]
 auth_uri = http://{{ controller_mgmt_ip }}:5000
 auth_url = http://{{ controller_mgmt_ip }}:35357
+memcached_servers = {{ controller_mgmt_ip }}:11211
 auth_version = 3.0
 auth_type = password
-project_domain_id = default
+project_domain_name = default
 user_domain_id = default
 project_name = service
 username = neutron

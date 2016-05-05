@@ -11,16 +11,17 @@ connection = mysql://glance:{{ glance_db_pass }}@{{ controller_mgmt_ip }}/glance
 [keystone_authtoken]
 auth_uri = http://{{ controller_mgmt_ip }}:5000
 auth_url = http://{{ controller_mgmt_ip }}:35357
+memcached_servers = {{ controller_mgmt_ip }}:11211
 auth_version = 3.0
 auth_plugin = password
-project_domain_id = default
+project_domain_name = default
 user_domain_id = default
 project_name = service
 username = glance
 password = {{ glance_pass }}
 
 [paste_deploy]
-#flavor=keystone
+flavor=keystone
 
 [OSLO_CONCURRENCY]
 lock_path = /var/lock/neutron

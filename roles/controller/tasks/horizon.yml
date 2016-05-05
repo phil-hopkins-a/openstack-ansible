@@ -27,7 +27,7 @@
   replace: dest=/root/horizon/openstack_dashboard/settings.py regexp='STATIC_ROOT = None' replace="STATIC_ROOT = '/var/www/static'"
 
 - name: modify the ROOT_PATH setting
-  replace: dest=/root/horizon/openstack_dashboard/settings.py regexp='ROOT_PATH = os\.path\.dirname\(os\.path\.abspath\(__file__\)\)' replace="#ROOT_PATH = os.path.dirname(os\.path\.abspath(__file__))\nROOT_PATH = '/var/www'"
+  replace: dest=/root/horizon/openstack_dashboard/settings.py regexp='ROOT_PATH = os\.path\.dirname\(os\.path\.abspath\(__file__\)\)' replace="#ROOT_PATH = os.path.dirname(os\.path\.abspath(__file__))\nROOT_PATH = '/var/www/'"
 
 - name: copy dashboard/conf
   copy: src=/root/horizon/openstack_dashboard/conf dest=/var/www
@@ -99,7 +99,7 @@
 - name: restart apache
   service:  name=apache2 state=restarted enabled=yes
   
-- name: correct /var/lib/openstack_dashboard permissions
+- name: correct /var/lib/openstack-dashboard permissions
   shell: chown -R horizon:horizon /var/lib/openstack-dashboard
  
 - name: Clone the novnc repo
