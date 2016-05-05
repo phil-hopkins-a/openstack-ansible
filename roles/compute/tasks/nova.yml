@@ -2,6 +2,9 @@
 - name: Create the nova user
   user: home="/var/lib/nova" createhome=yes system=yes shell=/bin/false name=nova  groups=libvirtd
 
+- name: install pip pycrypto
+  pip: name=pycrypto
+
 - name: use git to clone the nova git repo
   git: repo=https://github.com/openstack/nova.git version={{openstack_version}}
        dest=/root/nova

@@ -18,7 +18,7 @@ openstack_version: "stable/mitaka"
 #For installing from trunk
 #openstack_version: "HEAD"
 
-rabbit_user: guest
+rabbit_user: testuser
 rabbit_pass: secret
 
 mysql_root_pass: mysql
@@ -68,4 +68,14 @@ controller_host_name: controller
 compute_host_name: compute
 compute2_host_nam: compute2
 
+ifaceM: ens4
+
+# Interface VXLAN tunnels for instance traffic
+ifaceD: ens3
+
+# Interface for access
+ifaceA: ens5
+
+# external interface
+ifaceE: ens6
 

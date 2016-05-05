@@ -17,11 +17,11 @@
 
 - name: set permissions for the new rabbit user
   shell: creates=/etc/rabbitmq/newuser rabbitmqctl add_user {{ rabbit_user }} {{ rabbit_pass }}; touch /etc/rabbitmq/newuser
-  when: guest!="{{ rabbit_user }}"
+  when: rabbit_user!="guest"
 
 - name: change RabbitMQ default guest password
   shell: rabbitmqctl change_password {{ rabbit_user }} {{ rabbit_pass }}
-  when: guest=="{{ rabbit_user }}"
+  when: rabbit_user=="guest"
 
 - name: set permissions for the new rabbit user
   shell: rabbitmqctl set_permissions {{ rabbit_user }} ".*" ".*" ".*"
