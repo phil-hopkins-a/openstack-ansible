@@ -2,8 +2,6 @@
 # The main openstack site deployment playbook
 
 - hosts: all
-  vars_files:
-    - group_vars/interfaces-1604
     
   roles:
    - common
