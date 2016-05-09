@@ -100,7 +100,7 @@
   file: owner=root group=neutron path=/etc/neutron/plugins/ml2 state=directory
 
 - name: Copy the openvswitch upstart files
-  copy: src=neutron-openvswitch-agent dest=/etc/init/neutron-openvswitch-agent.conf
+  copy: src=neutron-openvswitch-agent.conf dest=/etc/init/neutron-openvswitch-agent.conf
   when: ml2_environment == 'openvswitch' and ubuntu == "u1404"
   
 - name: Copy the neutron openvswitch systemd file
@@ -114,7 +114,7 @@
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
 - name: Copy the linuxbridgeupstart files
-  copy: src=neutron-linuxbridge-agent dest=/etc/init/neutron-linuxbridge-agent.conf
+  copy: src=neutron-linuxbridge-agent.conf dest=/etc/init/neutron-linuxbridge-agent.conf
   when: ml2_environment == 'linuxbridge' and ubuntu == "u1404"
   notify: restart neutron
 

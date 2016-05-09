@@ -115,7 +115,7 @@
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
 - name: Copy the linuxbridgeupstart files
-  copy: src=neutron-linuxbridge-agent dest=/etc/init/neutron-linuxbridge-agent.conf
+  copy: src=neutron-linuxbridge-agent.conf dest=/etc/init/neutron-linuxbridge-agent.conf
   when: ml2_environment == 'linuxbridge' and ubuntu == "u1404"
   notify: restart neutron
 

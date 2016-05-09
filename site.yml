@@ -1,13 +1,10 @@
 ---
 # The main openstack site deployment playbook
-#- include: group_vars/interfaces-1404
-#  when: ubuntu=='u1404'
-
-#- include: group_vars/interfaces-1604
-#  when: ubuntu=='u1604'
 
 - hosts: all
-
+  vars_files:
+    - group_vars/interfaces-1604
+    
   roles:
    - common
   
