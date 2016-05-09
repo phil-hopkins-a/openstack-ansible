@@ -2,6 +2,29 @@
 # Ubuntu Version either 1404 or 1604 - experimental
 
 ubuntu: u1604
+
+#uncomment the proper section below depending on Ubuntu version
+#I need to find a better way of doing this but for now this works
+#The following are interface parameters for Ubuntu 14.04
+# Interface for management, API 
+#ifaceM: eth1
+# Interface VXLAN tunnels for instance traffic
+#ifaceD: eth0
+# Interface for access
+#ifaceA: eth2
+# external interface
+#ifaceE: eth3
+
+#The following are interface parameters for Ubuntu 16.04
+# Interface for management, API 
+ifaceM: ens4
+# Interface VXLAN tunnels for instance traffic
+ifaceD: ens3
+# Interface for access
+ifaceA: ens5
+# external interface
+ifaceE: ens6
+
 # Variables for openstack
 
 #Is this a linux bridge or openvswitch environment
