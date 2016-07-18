@@ -138,6 +138,16 @@
   copy: src=neutron-linuxbridge-cleanup dest=/etc/init.d/neutron-linuxbridge-cleanup mode=755
   notify: restart neutron
   when: ml2_environment == 'linuxbridge' and ubuntu == "u1604"
+
+- name: Copy the neutron ovs-cleanup systemd file
+  copy: src=neutron-ovs-cleanup.service dest=/lib/systemd/system/neutron-ovs-cleanup.service
+  notify: restart neutron
+  when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
+
+- name: Copy the neutron openvswitch cleanup systemd init file
+  copy: src=neutron-ovs-cleanup dest=/etc/init.d/neutron-ovs-cleanup mode=755
+  notify: restart neutron
+  when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
   
 - name: Start the openvswitch neutron services
   service: name=neutron-openvswitch-agent state=started enabled=yes

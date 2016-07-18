@@ -218,7 +218,7 @@
   notify: restart neutron
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
-- name: Copy the neutron openvswitch systemd init file
+- name: Copy the neutron openvswitch cleanup systemd init file
   copy: src=neutron-ovs-cleanup dest=/etc/init.d/neutron-ovs-cleanup mode=755
   notify: restart neutron
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
