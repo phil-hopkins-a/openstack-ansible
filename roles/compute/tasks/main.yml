@@ -150,7 +150,7 @@
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
 - name: enable the neutron openvswitch cleanup service
-  systemd: state=started enabled=yes name=neutron-ovs-cleanup
+  service: state=started enabled=yes name=neutron-ovs-cleanup
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
   
 - name: Start the openvswitch neutron services
