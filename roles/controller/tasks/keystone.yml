@@ -41,11 +41,11 @@
 - name: Create certs for the keystone
   shell: creates=/etc/keystone/ssl/certs/ca.pem /usr/local/bin/keystone-manage pki_setup --keystone-user keystone --keystone-group keystone; chmod 777 /var/lock
 
-- name: pip install glanceclient keystoneclient
-  shell: pip install python-glanceclient python-keystoneclient python-openstackclient
+#- name: pip install glanceclient keystoneclient
+#  shell: pip install python-glanceclient python-keystoneclient python-openstackclient
 
-- name: pip upgrade keystoneclient glanceclient
-  shell: pip install --upgrade python-glanceclient python-keystoneclient
+#- name: pip upgrade keystoneclient glanceclient
+#  shell: pip install --upgrade python-glanceclient python-keystoneclient
 
 - name: pip install additional packages
   shell: pip install repoze.lru pbr mysql-python
