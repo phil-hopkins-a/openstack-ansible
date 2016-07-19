@@ -16,8 +16,8 @@
 DESC="Openstack Neutron Open vSwitch Agent"
 PROJECT_NAME=neutron
 NAME=${PROJECT_NAME}-openvswitch-agent
-DAEMON=/usr/bin/neutron-openvswitch-agent
-DAEMON_ARGS="--config-file=/etc/neutron/plugins/ml2/openvswitch_agent.ini"
+DAEMON=/usr/local/bin/neutron-openvswitch-agent
+DAEMON_ARGS="--config-file=/etc/neutron/plugins/ml2/ml2_conf.ini"
 #!/bin/sh
 # The content after this line comes from openstack-pkg-tools
 # and has been automatically added to a .init.in script, which
