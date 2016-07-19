@@ -1,5 +1,8 @@
 ---
 # Tasks for the Horizon controller node
+- name: remove any existing horizon git directories
+#  shell: rm -rf /root/horizon
+  file: path=/root/horizon state=absent
 
 - name: Clone Horizon directory
   git: repo=https://github.com/openstack/horizon.git version={{openstack_version}}

@@ -147,6 +147,10 @@
   copy: src=neutron-ovs-cleanup dest=/etc/init.d/neutron-ovs-cleanup mode=755
   notify: restart neutron
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
+
+- name: enable the neutron openvswitch cleanup service
+  systemd: state=started enabled=yes name=neutron-ovs-cleanup
+  when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
   
 - name: Start the opensvswitch neutron services
   service: name=neutron-openvswitch-agent state=started enabled=yes
