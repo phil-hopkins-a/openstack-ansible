@@ -23,6 +23,7 @@ security_group_api = neutron
 linuxnet_interface_driver = {{ interface_driv }}
 auth_strategy = keystone
 force_config_drive = True
+use_neutron = True
 
 my_ip={{ local_ip }}
 
@@ -50,17 +51,18 @@ memcached_servers = {{ controller_mgmt_ip }}:11211
 #auth_version = 3
 auth_plugin = password
 project_domain_name = default
-user_domain_id = default
+user_domain_name = default
 project_name = service
 username = nova
 password = {{ nova_pass }}
+region_name = RegionOne
 
 [NEUTRON]
 url = http://{{ controller_mgmt_ip }}:9696
 auth_url = http://{{ controller_mgmt_ip }}:35357
 auth_plugin = password
-project_domain_id = default
-user_domain_id = default
+project_domain_name = default
+user_domain_name = default
 region_name = RegionOne
 project_name = service
 username = neutron
