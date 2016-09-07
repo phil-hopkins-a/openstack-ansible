@@ -20,7 +20,7 @@ volumes_path = /var/lib/nova/volumes
 enabled_apis = osapi_compute,metadata
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 security_group_api = neutron
-linuxnet_interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+#linuxnet_interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
 auth_strategy = keystone
 force_config_drive = True
 my_ip={{ local_ip }}
@@ -42,7 +42,7 @@ libvirt_cpu_mode=none
 auth_strategy = keystone
 
 [GLANCE]
-host = {{ controller_mgmt_ip }}
+api_servers = http://{{ controller_mgmt_ip }}:9292
 
 [KEYSTONE_AUTHTOKEN]
 auth_uri = http://{{ controller_mgmt_ip }}:5000

@@ -42,7 +42,7 @@ vncserver_listen={{ local_ipa }}
 connection = mysql://nova:{{ nova_db_pass }}@{{ controller_mgmt_ip }}/nova
 
 [GLANCE]
-host = {{ controller_mgmt_ip }}
+api_servers = http://{{ controller_mgmt_ip }}:9292
 
 [KEYSTONE_AUTHTOKEN]
 auth_uri = http://{{ controller_mgmt_ip }}:5000

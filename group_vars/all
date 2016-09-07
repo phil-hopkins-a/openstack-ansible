@@ -83,6 +83,7 @@ external_router_name: external-router
 
 admin_tenant: demo
 admin_tenant_user: demoadmin
+nonadmin_tenant_user: demo
 admin_pass: secrete 
 
 #Server Vars

@@ -41,7 +41,7 @@ openstack endpoint create keystone internal "http://$CONTROLLER_PUBLIC_ADDRESS:5
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
 
 #
-# Create a tenant
+# Create a project
 #
 openstack project create {{ admin_tenant }} \
           --description "Admin Project"
@@ -53,6 +53,17 @@ openstack user create {{ admin_tenant_user }} \
 openstack role add --user {{ admin_tenant_user }} \
                    --project {{ admin_tenant }} \
                    admin 
+
+openstack role create _member_
+
+openstack user create {{ nonadmin_tenant_user }} \
+          --password {{ admin_pass }} \
+          --project {{ admin_tenant }}
+
+openstack role add --user {{ nonadmin_tenant_user }} \
+                   --project {{ admin_tenant }} \
+                   _member_
+
 
 openstack project create service \
           --description "Services" 
