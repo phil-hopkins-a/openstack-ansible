@@ -37,6 +37,17 @@ novncproxy_base_url=http://localhost:16080/vnc_auto.html
 # Change vncserver_proxyclient_address and vncserver_listen to match each compute host
 vncserver_proxyclient_address={{ local_ipa }}
 vncserver_listen={{ local_ipa }}
+vnc_enabled = {{ vnc_enabled }}
+
+[spice]
+agent_enabled = True
+enabled = True
+html5proxy_base_url = http://localhost:6082/spice_auto.html
+html5proxy_host = {{ local_ipa }}
+html5proxy_port = 6082
+keymap = en-us
+server_listen = {{ local_ipa }}
+server_proxyclient_address = {{ local_ipa }}
 
 [DATABASE]
 connection = mysql://nova:{{ nova_db_pass }}@{{ controller_mgmt_ip }}/nova
