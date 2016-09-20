@@ -71,7 +71,7 @@ cinder_volume_dev: /dev/vdb
 # otherwise set this to hostvars[groups['openstack-ubu-controller'][0]]['ansible_'+ifaceM].ipv4.address 
 # about is not tested
 NOVNC_BASE_URL: "localhost:16080"
-vnc_enabled = False  # True for novnc, False for spice
+vnc_enabled: False  # True for novnc, False for spice
 
 external_network_name: pubilc
 external_subnet_name: public-subnet
