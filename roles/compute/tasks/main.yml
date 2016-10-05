@@ -106,12 +106,12 @@
 
 - name: Copy the neutron openvswitch systemd file
   copy: src=neutron-openvswitch-agent.service dest=/lib/systemd/system/neutron-openvswitch-agent.service
-  notify: restart eutron-openvswitch-agent
+  notify: restart neutron-openvswitch-agent
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
 - name: Copy the neutron openvswitch systemd init file
   copy: src=neutron-openvswitch-agent dest=/etc/init.d/neutron-openvswitch-agent mode=755
-  notify: restart eutron-openvswitch-agent
+  notify: restart neutron-openvswitch-agent
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
 - name: Copy the linuxbridgeupstart files
@@ -141,12 +141,12 @@
 
 - name: Copy the neutron ovs-cleanup systemd file
   copy: src=neutron-ovs-cleanup.service dest=/lib/systemd/system/neutron-ovs-cleanup.service
-  notify: restart eutron-openvswitch-agent
+  notify: restart neutron-openvswitch-agent
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
 - name: Copy the neutron openvswitch cleanup systemd init file
   copy: src=neutron-ovs-cleanup dest=/etc/init.d/neutron-ovs-cleanup mode=755
-  notify: restarteutron-openvswitch-agent
+  notify: restart neutron-openvswitch-agent
   when: ml2_environment == 'openvswitch' and ubuntu == "u1604"
 
 - name: enable the neutron openvswitch cleanup service

@@ -31,6 +31,7 @@ fixed_ip_disassociate_timeout = 30
 enable_instance_password = False
 service_neutron_metadata_proxy = True
 neutron_metadata_proxy_shared_secret = openstack
+libvirt_cpu_mode=none
 
 [vnc]
 novncproxy_base_url=http://localhost:16080/vnc_auto.html
@@ -38,6 +39,7 @@ novncproxy_base_url=http://localhost:16080/vnc_auto.html
 vncserver_proxyclient_address={{ local_ipa }}
 vncserver_listen={{ local_ipa }}
 enabled = {{ vnc_enabled }}
+keymap =
 
 [spice]
 agent_enabled = True

@@ -37,19 +37,20 @@ auth_strategy = keystone
 [vnc]
 novncproxy_base_url=http://localhost:16080/vnc_auto.html
 # Change vncserver_proxyclient_address and vncserver_listen to match each compute host
-vncserver_proxyclient_address={{ local_ipa }}
-vncserver_listen={{ local_ipa }}
+vncserver_proxyclient_address={{ local_ip }}
+vncserver_listen={{ local_ip }}
 enabled = {{ vnc_enabled }}
+keymap =
 
 [spice]
 agent_enabled = True
 enabled = True
 html5proxy_base_url = http://localhost:6080/spice_auto.html
-html5proxy_host = {{ local_ipa }}
+html5proxy_host = {{ local_ip }}
 html5proxy_port = 6080
 keymap = en-us
-server_listen = {{ local_ipa }}
-server_proxyclient_address = {{ local_ipa }}
+server_listen = {{ local_ip }}
+server_proxyclient_address = {{ local_ip }}
 
 [GLANCE]
 api_servers = http://{{ controller_mgmt_ip }}:9292
