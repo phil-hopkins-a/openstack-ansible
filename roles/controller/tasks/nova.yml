@@ -53,7 +53,7 @@
 
 - name: copy configuration file for nova
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf
-  when: openstack_version == "stable/mitaka"
+  when: openstack_version == "stable/mitaka" or openstack_version == "stable/newton"
 
 - name: copy configuration file for nova
   template: src=nova.conf.j2 dest=/etc/nova/nova.conf

@@ -60,7 +60,7 @@
 - name: Copy the neutron.conf  configuration files 
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf
   notify:  restart neutron
-  when: openstack_version == "stable/mitaka"
+  when: openstack_version == "stable/mitaka" or openstack_version == "stable/newton"
 
 - name: Copy the neutron.conf  configuration files 
   template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf
@@ -95,7 +95,7 @@
 
 - name: Copy the neutron dhcp agent configuration files 
   template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini
-  when: openstack_version == "stable/mitaka"
+  when: openstack_version == "stable/mitaka" or openstack_version == "stable/newton"
 
 - name: Copy the neutron dhcp agent configuration files 
   template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini
@@ -107,7 +107,7 @@
 
 - name: Copy the neutron l3 agent configuration files 
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini
-  when: openstack_version == "stable/mitaka"
+  when: openstack_version == "stable/mitaka" or openstack_version == "stable/newton"
 
 - name: Copy the neutron l3 agent configuration files 
   template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini
