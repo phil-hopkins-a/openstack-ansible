@@ -18,4 +18,5 @@
 - hosts: openstack-ubu-compute2
   roles:
    - compute2
+       when: compute_nodes > 2
  
