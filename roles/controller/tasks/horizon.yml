@@ -73,13 +73,16 @@
     chdir: /root/horizon
 
 - name: copy even more static
-  copy: src=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/static/ dest=/var/www/static owner=horizon group=horizon
+  synchronize: src=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/static/ dest=rsync:/var/www/static 
   
 - name: copy some static stuff
-  copy: src=/root/horizon/openstack_dashboard/dashboards/project/static/dashboard/project dest=/var/www/static/dashboard/  owner=horizon group=horizon
+  synchronize: src=/root/horizon/openstack_dashboard/dashboards/project/static/dashboard/project dest=rsync:/var/www/static/dashboard/
 
 - name: copy more static stuff
-  copy: src=/root/horizon/openstack_dashboard/dashboards/admin/static/dashboard/admin dest=/var/www/static/dashboard/  owner=horizon group=horizon
+  synchronize: src=/root/horizon/openstack_dashboard/dashboards/admin/static/dashboard/admin dest=rsync:/var/www/static/dashboard/
+
+-name: Set perms
+ file: path=/var/www/static owner=horizon group=horizon
 
 - name: Build a directory
   file: path=/var/www/static/horizon/lib/font-awesome state=directory owner=horizon group=horizon
