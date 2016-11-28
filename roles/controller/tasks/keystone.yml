@@ -165,7 +165,7 @@
   shell: sleep 10
   
 - name: Bootstrap a admin user for keystone (mitaka release and after)
-  shell: keystone-manage bootstrap --bootstrap-password {{ admin_pass }}   --bootstrap-admin-url http://{{ controller_mgmt_ip }}:35357/v3/   --bootstrap-internal-url http://{{ controller_mgmt_ip }}:35357/v3/   --bootstrap-public-url http://{{ controller_mgmt_ip }}:5000/v3/   --bootstrap-region-id RegionOne
+  shell: keystone-manage bootstrap --bootstrap-password {{ admin_pass }}   --bootstrap-admin-url http://{{ ansible_ens4[ipv4][address] }}:35357/v3/   --bootstrap-internal-url http://{{  ansible_ens4[ipv4][address] }}:35357/v3/   --bootstrap-public-url http://{{  ansible_ens4[ipv4][address] }}:5000/v3/   --bootstrap-region-id RegionOne
   when: openstack_version != "stable/liberty"
 
 - name: Upload the data to keystone database
