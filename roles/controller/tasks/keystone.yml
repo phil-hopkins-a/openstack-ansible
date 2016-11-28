@@ -138,6 +138,12 @@
 - name: Copy the adminrc file for v2 auth
   template: src=adminrc.j2 dest=/root/adminrc mode=0755
 
+- name: Copy the adminrcv3 file for v2 auth
+  template: src=adminrcv3.j2 dest=/root/adminrcv3 mode=0755
+
+- name: Copy the userrc file for v2 auth
+  template: src=userrcv3.j2 dest=/root/userrcv3 mode=0755
+
 - name: Copy the keystone log rotate file
   copy: src=keystone-logrotate dest=/etc/logrotate.d/keystone
   

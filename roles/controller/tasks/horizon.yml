@@ -36,7 +36,7 @@
   copy: src=/root/horizon/openstack_dashboard/conf dest=/var/www
 
 - name: copy dashboard/themes
-  copy: src=/root/horizon/openstack_dashboard/themes dest=/var/www
+  synchronize: src=/root/horizon/openstack_dashboard/themes dest=/var/www
   
 - name: execute run_tests
   shell: /root/horizon/run_tests.sh -V --compilemessages
@@ -73,16 +73,16 @@
     chdir: /root/horizon
 
 - name: copy even more static
-  synchronize: src=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/static/ dest=rsync:/var/www/static 
+  synchronize: src=/usr/local/lib/python2.7/dist-packages/openstack_dashboard/static/ dest=/var/www/static 
   
 - name: copy some static stuff
-  synchronize: src=/root/horizon/openstack_dashboard/dashboards/project/static/dashboard/project dest=rsync:/var/www/static/dashboard/
+  synchronize: src=/root/horizon/openstack_dashboard/dashboards/project/static/dashboard/project dest=/var/www/static/dashboard/
 
 - name: copy more static stuff
-  synchronize: src=/root/horizon/openstack_dashboard/dashboards/admin/static/dashboard/admin dest=rsync:/var/www/static/dashboard/
+  synchronize: src=/root/horizon/openstack_dashboard/dashboards/admin/static/dashboard/admin dest=/var/www/static/dashboard/
 
--name: Set perms
- file: path=/var/www/static owner=horizon group=horizon
+- name: Set perms
+  file: path=/var/www/static owner=horizon group=horizon
 
 - name: Build a directory
   file: path=/var/www/static/horizon/lib/font-awesome state=directory owner=horizon group=horizon
@@ -115,7 +115,7 @@
   file: path=/usr/share/novnc state=directory
 
 - name: copy the novnc files
-  copy: src=/root/noVNC/ dest=/usr/share/novnc
+  synchronize: src=/root/noVNC/ dest=/usr/share/novnc
 
 - name: install some packages novnc needs
   apt: pkg={{ item }} state=latest
