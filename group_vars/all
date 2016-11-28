@@ -39,7 +39,7 @@ interface_driv: neutron.agent.linux.interface.BridgeInterfaceDriver
 #openstack_version: "stable/mitaka"
 openstack_version: "stable/newton"
 
-compute_nodes: 2
+compute_nodes: 3
 
 #For installing from trunk
 #openstack_version: "HEAD"

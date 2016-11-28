@@ -30,15 +30,15 @@ export OS_PROJECT_NAME=admin
 export OS_DOMAIN_NAME=default
 export OS_REGION_NAME=RegionOne
 
-token_id=`openstack token issue --os-username admin --os-project-name admin         --os-user-domain-id default --os-project-domain-id default --os-identity-api-version 3 --os-auth-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-password {{ admin_pass }}|egrep " id"|cut -d '|' -f 3`
-openstack service create identity --name keystone --description "Keystone Identity Service" \
-          --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create keystone admin "http://$CONTROLLER_PUBLIC_ADDRESS:35357/v3" --region RegionOne \
-        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create keystone public "http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3"  --region RegionOne \
-        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create keystone internal "http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3"  --region RegionOne \
-        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+#token_id=`openstack token issue --os-username admin --os-project-name admin         --os-user-domain-id default --os-project-domain-id default --os-identity-api-version 3 --os-auth-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-password {{ admin_pass }}|egrep " id"|cut -d '|' -f 3`
+#openstack service create identity --name keystone --description "Keystone Identity Service" \
+#          --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+#openstack endpoint create keystone admin "http://$CONTROLLER_PUBLIC_ADDRESS:35357/v3" --region RegionOne \
+#        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+#openstack endpoint create keystone public "http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3"  --region RegionOne \
+#        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
+#openstack endpoint create keystone internal "http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3"  --region RegionOne \
+#        --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
 
 #
 # Create a project

@@ -116,6 +116,14 @@
 - name: DB sync for keystone
   shell: creates=/etc/keystone/db.synced /usr/local/bin/keystone-manage db_sync; touch /etc/keystone/db.synced
 
+- name: Initialize Fernet keys
+  shell: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+  when: openstack_version != "stable/liberty"
+
+- name: Initialize Fernet keys 2
+  shell: keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+  when: openstack_version != "stable/liberty"
+  
 - name: Copy the file for data insertion into keystone
   template: src=keystone_data.sh.j2 dest=/tmp/keystone_data.sh mode=0755
   when: openstack_version != "stable/liberty"
@@ -151,7 +159,11 @@
   shell: sleep 10
   
 - name: Bootstrap a admin user for keystone (mitaka release and after)
-  shell: keystone-manage bootstrap --bootstrap-password {{ admin_pass }}
+  shell: keystone-manage bootstrap --bootstrap-password {{ admin_pass }} \
+  --bootstrap-admin-url http://{{ controller_mgmt_ip }}:35357/v3/ \
+  --bootstrap-internal-url http://{{ controller_mgmt_ip }}:35357/v3/ \
+  --bootstrap-public-url http://{{ controller_mgmt_ip }}:5000/v3/ \
+  --bootstrap-region-id RegionOne
   when: openstack_version != "stable/liberty"
 
 - name: Upload the data to keystone database
