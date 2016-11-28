@@ -2,8 +2,8 @@
 # Tasks for the openstack compute nodes
 
 - include: neutron.yml
-    when: compute_nodes > 2
+#    when: compute_nodes > 2
 
 - include: nova.yml
-    when: compute_nodes > 2
+#    when: compute_nodes > 2
 
