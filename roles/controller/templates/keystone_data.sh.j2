@@ -81,11 +81,11 @@ openstack role add --user nova \
 openstack service create --name nova \
                         --description "Nova Compute Service" compute
 
-openstack endpoint create nova admin "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s" --region RegionOne \
+openstack endpoint create compute admin "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s" --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create nova public "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s"  --region RegionOne \
+openstack endpoint create compute public "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create nova internal "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s"  --region RegionOne \
+openstack endpoint create compute internal "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
 
 #
@@ -103,11 +103,11 @@ openstack role add --user cinder \
 openstack service create --name cinder \
                         --description "Cinder Volume Service" volume
 
-openstack endpoint create cinder admin "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s" --region RegionOne \
+openstack endpoint create volume admin "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s" --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create cinder public "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s"  --region RegionOne \
+openstack endpoint create volume public "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create cinder internal "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s"  --region RegionOne \
+openstack endpoint create volume internal "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
 
 
@@ -126,11 +126,11 @@ openstack role add --user glance \
 openstack service create --name glance \
                         --description "Glance Image Service" image
 
-openstack endpoint create glance admin "http://$CONTROLLER_PUBLIC_ADDRESS:9292" --region RegionOne \
+openstack endpoint create image admin "http://$CONTROLLER_PUBLIC_ADDRESS:9292" --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create glance public "http://$CONTROLLER_PUBLIC_ADDRESS:9292"  --region RegionOne \
+openstack endpoint create image public "http://$CONTROLLER_PUBLIC_ADDRESS:9292"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create glance internal "http://$CONTROLLER_PUBLIC_ADDRESS:9292"  --region RegionOne \
+openstack endpoint create image internal "http://$CONTROLLER_PUBLIC_ADDRESS:9292"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
 
 #
@@ -148,11 +148,11 @@ openstack role add --user neutron \
 openstack service create --name neutron \
                         --description "Neutron Network Service" network
 
-openstack endpoint create neutron admin "http://$CONTROLLER_PUBLIC_ADDRESS:9696" --region RegionOne \
+openstack endpoint create network admin "http://$CONTROLLER_PUBLIC_ADDRESS:9696" --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create neutron public "http://$CONTROLLER_PUBLIC_ADDRESS:9696"  --region RegionOne \
+openstack endpoint create network public "http://$CONTROLLER_PUBLIC_ADDRESS:9696"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create neutron internal "http://$CONTROLLER_PUBLIC_ADDRESS:9696"  --region RegionOne \
+openstack endpoint create network internal "http://$CONTROLLER_PUBLIC_ADDRESS:9696"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
 
 #
@@ -170,11 +170,11 @@ openstack role add --user swift \
 openstack service create --name swift \
                         --description "Swift Service" "object-store"
 
-openstack endpoint create swift admin "http://$CONTROLLER_ADMIN_ADDRESS:8888/v1" --region RegionOne \
+openstack endpoint create object-store admin "http://$CONTROLLER_ADMIN_ADDRESS:8888/v1" --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create swift public "http://$CONTROLLER_PUBLIC_ADDRESS:8888/v1/AUTH_\$(tenant_id)s"  --region RegionOne \
+openstack endpoint create object-store public "http://$CONTROLLER_PUBLIC_ADDRESS:8888/v1/AUTH_\$(tenant_id)s"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
-openstack endpoint create swift internal "http://$CONTROLLER_INTERNAL_ADDRESS:8888/v1/AUTH_\$(tenant_id)s"  --region RegionOne \
+openstack endpoint create object-store internal "http://$CONTROLLER_INTERNAL_ADDRESS:8888/v1/AUTH_\$(tenant_id)s"  --region RegionOne \
         --os-token $token_id --os-url http://$CONTROLLER_PUBLIC_ADDRESS:5000/v3 --os-identity-api-version 3
 
 
