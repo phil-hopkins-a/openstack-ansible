@@ -63,7 +63,7 @@
 
 - name: Download Upper pip limits
   get_url:
-    url: https://raw.githubusercontent.com/openstack/requirements/master/upper-constraints.txt
+    url: https://raw.githubusercontent.com/openstack/requirements/{{ openstack_version }}/upper-constraints.txt
     dest: /root
     mode: 440
 
