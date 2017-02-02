@@ -32,7 +32,7 @@
      chdir: /root
      
 - name: install the glance files
-  shell: pip install -U .
+  shell: pip install -U . -c ../upper-constraints.txt
   args:
      chdir: /root/glance
 

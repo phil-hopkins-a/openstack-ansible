@@ -1,5 +1,5 @@
 ---
-## Do nt use not tested
+## Do not use not tested
 # Tasks for the cinder controller node
 
 - name: Install OpenStack Nova  packages.

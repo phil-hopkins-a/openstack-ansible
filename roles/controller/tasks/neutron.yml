@@ -34,12 +34,12 @@
   copy: src=neutron_sudoers dest=/etc/sudoers.d/neutron_sudoers mode=440
 
 - name: install the neutron files
-  shell: pip install -U .
+  shell: pip install -U . -c ../upper-constraints.txt
   args:
      chdir: /root/neutron
 
 - name: install the neutron-lbaas files
-  shell: pip install -U .
+  shell: pip install -U . -c ../upper-constraints.txt
   args:
      chdir: /root/neutron-lbaas
 

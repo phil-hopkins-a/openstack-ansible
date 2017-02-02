@@ -78,7 +78,7 @@
   shell: mv /etc/keystone/keystone.conf.sample /etc/keystone/keystone.conf
 
 - name: install the keystone files
-  shell: pip install -U .
+  shell: pip install -U . -c ../upper-constraints.txt
   args:
      chdir: /root/keystone
 

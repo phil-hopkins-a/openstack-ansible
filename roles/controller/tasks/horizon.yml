@@ -50,7 +50,7 @@
   replace: dest=/var/www/conf/policy.v3cloudsample.json regexp='"cloud_admin"{{ ":" }} "role{{ ":" }}admin and \(token\.is_admin_project{{ ":" }}True or domain_id{{ ":" }}admin_domain_id\)",' replace='"cloud_admin"{{ ":" }} "rule{{ ":" }}admin_required and domain_id{{ ":" }}domain_id",' 
   
 - name: install horizon
-  shell: pip install -U .
+  shell: pip install -U . -c ../upper-constraints.txt
   args:
      chdir: /root/horizon
 

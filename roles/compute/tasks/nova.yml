@@ -38,7 +38,7 @@
   copy: src=nova_sudoers dest=/etc/sudoers.d/nova_sudoers mode=440
 
 - name: install the nova files
-  shell: pip install -U .
+  shell: pip install -U . -c ../upper-constraints.txt
   args:
      chdir: /root/nova
 
