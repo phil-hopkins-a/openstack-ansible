@@ -1,4 +1,10 @@
 
+- name: Download Upper pip limits
+  get_url:
+    url: https://raw.githubusercontent.com/openstack/requirements/{{ openstack_version }}/upper-constraints.txt
+    dest: /root
+    mode: 440
+
 - name: Install the required virtualization packages
   apt: name={{ item }} state=installed
   with_items:
